@@ -1,10 +1,10 @@
-import { apiClient } from "../config/api.client";
-import { ENDPOINTS } from "../config/api.config";
-import { BaseApiResponse } from "../types/api.types";
+import {apiClient} from "../config/api.client";
+import {ENDPOINTS} from "../config/api.config";
+import {BaseApiResponse} from "../types/api.types";
 
 /**
  * Review Service
- * Handles user reviews for heritage sites and game levels
+ * Handles user reviews for various content types
  */
 class ReviewServiceClass {
   async getAll() {

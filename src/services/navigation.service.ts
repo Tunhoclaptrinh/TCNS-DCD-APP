@@ -40,7 +40,6 @@ export const NavigationService = {
 
   // Home flow
   toHome: () => navigate("HomeScreen"),
-  toHeritageDetail: (id: number | string) => navigate("HeritageDetail", {id}),
 
   // Search flow
   toSearch: () => navigate("DiscoveryScreen"),
@@ -53,8 +52,6 @@ export const NavigationService = {
   toNotificationSettings: () => navigate("Notifications"), // Or specific settings
   toSupport: () => navigate("Support"),
   toTermsPrivacy: () => navigate("TermsPrivacy"),
-
-
 
   // Common
   toNotifications: () => navigate("Notifications"),
