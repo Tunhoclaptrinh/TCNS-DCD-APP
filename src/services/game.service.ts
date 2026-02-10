@@ -31,7 +31,7 @@ export const GameService = {
   },
 
   submitAnswer: async (sessionId: number | string, answerId: string) => {
-    return apiClient.post<BaseApiResponse<{is_correct: boolean, points_earned: number, total_score: number, explanation?: string, correct_answer?: string}>>(ENDPOINTS.GAME.SUBMIT_ANSWER(sessionId), { answerId });
+    return apiClient.post<BaseApiResponse<{isCorrect: boolean, pointsEarned: number, totalScore: number, explanation?: string, correctAnswer?: string}>>(ENDPOINTS.GAME.SUBMIT_ANSWER(sessionId), { answerId });
   },
 
   submitTimeline: async (sessionId: number | string, eventOrder: string[]) => {

@@ -1,18 +1,18 @@
 export interface Review {
   id: number;
   userId: number;
-  restaurantId: number;
-  productId?: number;
-  rating: 1 | 2 | 3 | 4 | 5;
+  userName?: string;
+  userAvatar?: string;
+  heritageId?: number;
+  artifactId?: number;
+  rating: number;
   comment: string;
   createdAt: string;
-  updatedAt: string;
 }
 
 export interface CreateReviewRequest {
-  type: "restaurant" | "product";
-  restaurantId: number;
-  productId?: number;
+  type: "heritage" | "artifact";
+  referenceId: number;
   rating: number;
   comment: string;
 }

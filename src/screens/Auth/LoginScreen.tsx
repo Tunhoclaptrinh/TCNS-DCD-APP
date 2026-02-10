@@ -1,51 +1,109 @@
-import React, { useState } from 'react';
-import { View, TextInput, Button, StyleSheet, Text, ActivityIndicator } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { login } from '../../store/slices/authSlice';
-import { AppDispatch, RootState } from '../../store';
+import React, {useState} from "react";
+import {View, StyleSheet, ScrollView, TouchableOpacity, Text} from "react-native";
+import {useAuth} from "@/src/hooks/useAuth";
+import Input from "@/src/components/common/Input/Input";
+import Button from "@/src/components/common/Button";
+import {validateEmail, validatePassword} from "@/src/utils/validation";
+import {COLORS} from "@/src/styles/colors";
+import {useTranslation} from "@/src/utils/i18n";
+import {useTheme} from "@react-navigation/native";
 
-const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const dispatch = useDispatch<AppDispatch>();
-  const { loading, error } = useSelector((state: RootState) => state.auth);
+const LoginScreen = ({navigation}: any) => {
+  const [email, setEmail] = useState("user@example.com");
+  const [password, setPassword] = useState("123456");
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const {login} = useAuth();
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    dispatch(login({ email, password }));
+  const {t} = useTranslation();
+  const {colors} = useTheme();
+
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+    if (!validateEmail(email)) newErrors.email = "Invalid email";
+    if (!validatePassword(password)) newErrors.password = "Password too short";
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleLogin = async () => {
+    if (!validateForm()) return;
+    setLoading(true);
+    try {
+      await login({email, password});
+    } catch (error: any) {
+      setErrors({general: error.response?.data?.message || "Login failed"});
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Base Login</Text>
-      {error && <Text style={styles.error}>{error}</Text>}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>BASE APP</Text>
+        <Text style={styles.subtitle}>Welcome Back!</Text>
+      </View>
+
+      {errors.general && <Text style={styles.errorText}>{errors.general}</Text>}
+
+      <Input
+        label="Email"
+        placeholder="your@email.com"
         value={email}
         onChangeText={setEmail}
-        autoCapitalize="none"
+        keyboardType="email-address"
+        error={errors.email}
+        containerStyle={styles.input}
       />
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
+
+      <Input
+        label="Password"
+        placeholder="••••••••"
         value={password}
         onChangeText={setPassword}
         secureTextEntry
+        error={errors.password}
+        containerStyle={styles.input}
       />
-      {loading ? (
-        <ActivityIndicator />
-      ) : (
-        <Button title="Login" onPress={handleLogin} />
-      )}
-    </View>
+
+      <Button title={t("login") || "Login"} onPress={handleLogin} loading={loading} containerStyle={styles.button} />
+
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Don't have an account? </Text>
+        <TouchableOpacity onPress={() => navigation.navigate("Register")}>
+          <Text style={styles.linkText}>Register</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20 },
-  title: { fontSize: 24, marginBottom: 20, textAlign: 'center' },
-  input: { borderWidth: 1, borderColor: '#ccc', padding: 10, marginBottom: 10, borderRadius: 5 },
-  error: { color: 'red', marginBottom: 10, textAlign: 'center' }
+  container: {flex: 1, backgroundColor: COLORS.WHITE},
+  content: {padding: 20, justifyContent: "center", flexGrow: 1},
+  headerContainer: {
+    marginBottom: 40,
+    alignItems: "center",
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: "bold",
+    color: COLORS.PRIMARY,
+    textAlign: "center",
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: COLORS.GRAY,
+    textAlign: "center",
+  },
+  input: {marginVertical: 12},
+  button: {marginTop: 20, width: "100%"},
+  errorText: {color: COLORS.ERROR, marginBottom: 12, textAlign: "center"},
+  footer: {flexDirection: "row", justifyContent: "center", marginTop: 20},
+  footerText: {color: COLORS.GRAY},
+  linkText: {color: COLORS.PRIMARY, fontWeight: "600"},
 });
 
 export default LoginScreen;

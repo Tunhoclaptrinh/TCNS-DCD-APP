@@ -95,7 +95,7 @@ const Input: React.FC<InputProps> = ({
           styles.inputContainer,
           {borderColor: getBorderColor()},
           !editable && styles.disabledInput,
-          !!error && styles.errorInput,
+          error && styles.errorInput,
           isFocused && styles.focusedInput,
           multiline && styles.multilineContainer,
         ]}

@@ -1,35 +1,34 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Appearance } from 'react-native';
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export interface SettingsState {
-  theme: 'light' | 'dark' | 'system';
-  language: 'vi' | 'en';
-  notifications: boolean;
-  biometrics: boolean;
+interface SettingsState {
+  theme: "light" | "dark";
+  language: "vi" | "en";
+  notificationsEnabled: boolean;
+  biometricsEnabled: boolean;
 }
 
 const initialState: SettingsState = {
-  theme: 'system',
-  language: 'vi',
-  notifications: true,
-  biometrics: false,
+  theme: "light",
+  language: "vi",
+  notificationsEnabled: true,
+  biometricsEnabled: false,
 };
 
 const settingsSlice = createSlice({
-  name: 'settings',
+  name: "settings",
   initialState,
   reducers: {
-    setTheme: (state, action: PayloadAction<'light' | 'dark' | 'system'>) => {
+    setTheme(state, action: PayloadAction<"light" | "dark">) {
       state.theme = action.payload;
     },
-    setLanguage: (state, action: PayloadAction<'vi' | 'en'>) => {
+    setLanguage(state, action: PayloadAction<"vi" | "en">) {
       state.language = action.payload;
     },
-    toggleNotifications: (state) => {
-      state.notifications = !state.notifications;
+    toggleNotifications(state) {
+      state.notificationsEnabled = !state.notificationsEnabled;
     },
-    toggleBiometrics: (state) => {
-      state.biometrics = !state.biometrics;
+    toggleBiometrics(state) {
+      state.biometricsEnabled = !state.biometricsEnabled;
     },
   },
 });

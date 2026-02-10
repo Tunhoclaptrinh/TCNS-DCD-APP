@@ -17,7 +17,7 @@ export const useNavigation = () => {
     replace: navigation.replace as any,
 
     // Custom helper methods
-    // ...NavigationService,
+    ...NavigationService,
   };
 };
 

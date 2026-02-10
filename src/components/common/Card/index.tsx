@@ -23,7 +23,7 @@ const Card: React.FC<CardProps> = ({
   contentStyle,
   loading = false,
 }) => {
-  const Component = (onPress ? TouchableOpacity : View) as React.ElementType;
+  const Component = onPress ? TouchableOpacity : View;
 
   const variantCardStyle =
     variant === "horizontal" ? styles.horizontalCard : variant === "minimal" ? styles.minimalCard : undefined;

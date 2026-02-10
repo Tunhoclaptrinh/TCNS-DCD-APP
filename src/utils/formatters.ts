@@ -38,6 +38,9 @@ export const getImageUrl = (path?: string): string | undefined => {
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   
   const finalUrl = `${baseUrl}${cleanPath}`;
-  console.log(`[getImageUrl] Input: ${path} | Output: ${finalUrl}`);
+  // Debug log for images (filter out excessive logs if needed)
+  if (path.includes('uploads')) {
+      console.log(`[getImageUrl] ${path} -> ${finalUrl}`);
+  }
   return finalUrl;
 };

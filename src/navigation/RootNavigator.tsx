@@ -1,56 +1,82 @@
-import React, { useEffect } from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { useDispatch, useSelector } from 'react-redux';
-import { ActivityIndicator, View, TouchableOpacity, Text } from 'react-native';
+import React, {useEffect, useState} from "react";
+import {View, ActivityIndicator, Text, TouchableOpacity, StyleSheet} from "react-native";
+import {NavigationContainer} from "@react-navigation/native";
+import {navigationRef} from "@services/navigation.service";
+import * as LocalAuthentication from "expo-local-authentication";
+import {Ionicons} from "@expo/vector-icons";
+import {COLORS} from "../styles/colors";
+import AuthNavigator from "./AuthNavigator";
+import MainNavigator from "./MainNavigator";
+import {RootState} from "@/src/store";
+import {useSelector} from "react-redux";
 
-import LoginScreen from '../screens/Auth/LoginScreen';
-import HomeScreen from '../screens/Home/HomeScreen';
-import UserListScreen from '../screens/Users/UserListScreen';
-import CategoryListScreen from '../screens/Categories/CategoryListScreen';
-
-import { initializeAuth } from '../store/slices/authSlice';
-import { AppDispatch, RootState } from '../store';
-
-const Stack = createNativeStackNavigator();
-const Tab = createBottomTabNavigator();
-
-function MainTabNavigator() {
-  return (
-    <Tab.Navigator screenOptions={{ headerShown: false }}>
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Users" component={UserListScreen} />
-      <Tab.Screen name="Categories" component={CategoryListScreen} />
-    </Tab.Navigator>
-  );
+interface RootNavigatorProps {
+  isAuthenticated: boolean;
 }
 
-export default function RootNavigator() {
-  const dispatch = useDispatch<AppDispatch>();
-  const { token, loading } = useSelector((state: RootState) => state.auth);
+const RootNavigator = ({isAuthenticated}: RootNavigatorProps) => {
+  const {user} = useSelector((state: RootState) => state.auth);
+  const [isLocked, setIsLocked] = useState(false);
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   useEffect(() => {
-    dispatch(initializeAuth());
-  }, []);
+    setIsLocked(false);
+  }, [isAuthenticated]);
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+  const authenticate = async () => {
+    // Placeholder for authentication logic
+  };
+
+  if (isAuthenticated && isLocked) {
+      return (
+        <View style={styles.lockContainer}>
+             <Ionicons name="lock-closed" size={64} color={COLORS.PRIMARY} style={{marginBottom: 24}} />
+             <Text style={styles.lockTitle}>Locked</Text>
+             <TouchableOpacity style={styles.unlockButton} onPress={authenticate}>
+                <Text style={styles.unlockText}>Unlock</Text>
+             </TouchableOpacity>
+        </View>
+      );
   }
 
-  return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {token ? (
-          <Stack.Screen name="Main" component={MainTabNavigator} />
-        ) : (
-          <Stack.Screen name="Login" component={LoginScreen} />
-        )}
-      </Stack.Navigator>
-    </NavigationContainer>
-  );
-}
+  const getNavigator = () => {
+    if (!isAuthenticated || !user) {
+      return <AuthNavigator />;
+    }
+    // Future role checks can go here
+    return <MainNavigator />;
+  };
+
+  return <NavigationContainer ref={navigationRef}>{getNavigator()}</NavigationContainer>;
+};
+
+const styles = StyleSheet.create({
+  lockContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: COLORS.WHITE,
+    padding: 20,
+  },
+  lockTitle: {
+    fontSize: 24,
+    fontWeight: "bold",
+    color: COLORS.DARK,
+    marginBottom: 8,
+  },
+  unlockButton: {
+    backgroundColor: COLORS.PRIMARY,
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 30,
+    width: "80%",
+    alignItems: "center",
+  },
+  unlockText: {
+    color: COLORS.WHITE,
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+});
+
+export default RootNavigator;

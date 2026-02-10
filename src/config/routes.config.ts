@@ -10,19 +10,11 @@ export type RouteParams = {
 
   // Main Stack - Home
   HomeScreen: undefined;
-  HeritageDetail: {id: number | string};
-  ArtifactDetail: {artifact: any};
-  
-  // Main Stack - Discovery
-  DiscoveryScreen: undefined;
-
-  // Main Stack - Study
-  StudyScreen: undefined;
 
   // Main Stack - Profile
   ProfileScreen: undefined;
   EditProfile: undefined;
-  
+
   // Common
   Notifications: undefined;
   Settings: undefined;
@@ -42,27 +34,12 @@ export const ROUTE_NAMES = {
   // Main Tabs
   TABS: {
     HOME: "Home",
-    DISCOVERY: "Discovery",
-    STUDY: "Study",
-    GAME: "Game",
     PROFILE: "Profile",
-  },
-
-  // Discovery Stack
-  DISCOVERY: {
-    SCREEN: "DiscoveryScreen",
-  },
-
-  // Study Stack
-  STUDY: {
-     SCREEN: "StudyScreen",
   },
 
   // Home Stack
   HOME: {
     SCREEN: "HomeScreen",
-    HERITAGE_DETAIL: "HeritageDetail",
-    ARTIFACT_DETAIL: "ArtifactDetail",
   },
 
   // Profile Stack
@@ -75,7 +52,6 @@ export const ROUTE_NAMES = {
   COMMON: {
     NOTIFICATIONS: "Notifications",
     SETTINGS: "Settings",
-    AI_CHAT: "AIChat",
   },
 } as const;
 
@@ -105,16 +81,10 @@ export const SCREEN_OPTIONS = {
   // Tab bar icons
   TAB_ICONS: {
     HOME: {focused: "home", unfocused: "home-outline"},
-    DISCOVERY: {focused: "search", unfocused: "search-outline"},
-    STUDY: {focused: "book", unfocused: "book-outline"},
-    GAME: {focused: "basketball", unfocused: "basketball-outline"},
     PROFILE: {focused: "person", unfocused: "person-outline"},
   },
 } as const;
 
 // Navigation helper types
 export type RootStackParamList = RouteParams;
-export type TabParamList = Pick<
-  RouteParams,
-  "HomeScreen" | "ProfileScreen"
->;
+export type TabParamList = Pick<RouteParams, "HomeScreen" | "ProfileScreen">;

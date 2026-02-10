@@ -1,6 +1,6 @@
 export const API_CONFIG = {
   // Use 10.0.2.2 for Android Emulator to access host machine's localhost
-  BASE_URL: process.env.EXPO_PUBLIC_API_URL || "http://10.0.2.2:3000/api",
+  BASE_URL: process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.37:3000/api",
   TIMEOUT: 30000,
   RETRY_COUNT: 3,
 };
@@ -31,6 +31,14 @@ export const ENDPOINTS = {
     NEARBY: "/heritage-sites/nearby",
     ARTIFACTS: (id: number | string) => `/heritage-sites/${id}/artifacts`,
     TIMELINE: (id: number | string) => `/heritage-sites/${id}/timeline`,
+  },
+
+  // History / Articles
+  HISTORY: {
+    BASE: "/history",
+    GET_ONE: (id: number | string) => `/history/${id}`,
+    RELATED: (id: number | string) => `/history/${id}/related`,
+    STATS: "/history/stats/summary",
   },
 
   // Artifacts (Hiện vật)

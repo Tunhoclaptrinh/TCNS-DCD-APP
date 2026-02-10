@@ -4,7 +4,7 @@ export interface Chapter extends BaseEntity {
   title: string;
   description: string;
   order: number;
-  imageUrl?: string;
+  image?: string;
   isUnlocked: boolean;
   minLevelRequired?: number;
 }

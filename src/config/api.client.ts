@@ -20,7 +20,9 @@ class ApiClient {
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
-      console.log(`[API Req] ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
+      console.log(`[API Req] ${config.method?.toUpperCase()} ${config.url}`);
+      // console.log("Params:", config.params);
+      // console.log("Data:", config.data);
       return config;
     });
 
@@ -28,12 +30,17 @@ class ApiClient {
     this.client.interceptors.response.use(
       (response) => {
         console.log(`[API Res] ${response.status} ${response.config.url}`);
+        // Log data for specific endpoints or all if needed for debugging
+        if (response.config.url?.includes('/heritage-sites') || response.config.url?.includes('/game')) {
+             console.log("Response Data:", JSON.stringify(response.data, null, 2));
+        }
         return response.data;
       },
       async (error: AxiosError) => {
-        console.error(`[API Err] ${error.config?.baseURL}${error.config?.url}`, error.message);
+        console.error(`[API Err] ${error.config?.url}`, error.message);
         if (error.response) {
-            console.error("Status:", error.response.status, "Data:", error.response.data);
+            console.error("Status:", error.response.status);
+            console.error("Data:", JSON.stringify(error.response.data, null, 2));
         }
         if (error.response?.status === 401) {
           // Token expired or invalid

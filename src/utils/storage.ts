@@ -1,8 +1,8 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export class StorageService {
-  private static readonly TOKEN_KEY = "auth_token";
-  private static readonly USER_KEY = "auth_user";
+  private static readonly TOKEN_KEY = "authToken";
+  private static readonly USER_KEY = "authUser";
 
   static async setToken(token: string): Promise<void> {
     await AsyncStorage.setItem(this.TOKEN_KEY, token);

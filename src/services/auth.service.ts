@@ -14,22 +14,25 @@ class AuthServiceClass {
    * Login user
    */
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<any>(ENDPOINTS.AUTH.LOGIN, credentials);
-    if (response.success || response.token) {
-        return response.data || response;
+    const response = await apiClient.post<BaseApiResponse<AuthResponse>>(ENDPOINTS.AUTH.LOGIN, credentials);
+    // Adjust based on actual backend response structure
+    // If backend returns { success: true, data: { token, user } }
+    if (response.data && response.data.data) {
+        return response.data.data;
     }
-    return response as any;
+    // Fallback if response.data IS the data (depends on axios interceptor)
+    return response.data as unknown as AuthResponse;
   }
 
   /**
    * Register new user
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<any>(ENDPOINTS.AUTH.REGISTER, data);
-    if (response.success || response.token) {
-        return response.data || response;
+    const response = await apiClient.post<BaseApiResponse<AuthResponse>>(ENDPOINTS.AUTH.REGISTER, data);
+     if (response.data && response.data.data) {
+        return response.data.data;
     }
-    return response as any;
+    return response.data as unknown as AuthResponse;
   }
 
   /**
@@ -43,11 +46,11 @@ class AuthServiceClass {
    * Get current user
    */
   async getMe(): Promise<User> {
-    const response = await apiClient.get<any>(ENDPOINTS.AUTH.ME);
-    if (response.success || response.id) {
-        return response.data || response;
+    const response = await apiClient.get<BaseApiResponse<User>>(ENDPOINTS.AUTH.ME);
+     if (response.data && response.data.data) {
+        return response.data.data;
     }
-    return response as any;
+    return response.data as unknown as User;
   }
 
   /**

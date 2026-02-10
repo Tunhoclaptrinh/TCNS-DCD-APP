@@ -2,10 +2,12 @@ import { BaseEntity } from './index';
 
 export interface HeritageSite extends BaseEntity {
   name: string;
+  type: string;
   description: string;
   location: string;
+  address?: string;
   category: string;
-  imageUrl: string;
+  image: string;
   gallery: string[];
   historicalEra?: string;
   significance?: string;
@@ -14,20 +16,22 @@ export interface HeritageSite extends BaseEntity {
   viewCount?: number;
   isFavorite?: boolean;
   // New fields for polish
-  visit_hours?: string;
-  entrance_fee?: number;
-  year_established?: string;
-  cultural_period?: string;
+  visitHours?: string;
+  entranceFee?: number;
+  yearEstablished?: string;
+  culturalPeriod?: string;
   rating?: number;
-  total_reviews?: number;
-  unesco_listed?: boolean;
-  related_history_ids?: number[];
+  totalReviews?: number;
+  unescoListed?: boolean;
+  relatedHistoryIds?: number[];
+  relatedHeritageIds?: number[];
+  relatedArtifactIds?: number[];
 }
 
 export interface Artifact extends BaseEntity {
   name: string;
   description: string;
-  imageUrl: string;
+  image: string;
   gallery: string[];
   heritageId: number | string;
   category: string;
@@ -37,14 +41,14 @@ export interface Artifact extends BaseEntity {
   is3D?: boolean;
   modelUrl?: string; // URL for 3D model
   // New fields for polish
-  year_created?: string;
+  yearCreated?: string;
   creator?: string;
   condition?: string;
-  artifact_type?: string;
-  historical_context?: string;
-  cultural_significance?: string;
+  artifactType?: string;
+  historicalContext?: string;
+  culturalSignificance?: string;
   rating?: number;
-  total_reviews?: number;
+  totalReviews?: number;
 }
 
 export interface TimelineEvent {

@@ -69,23 +69,7 @@ class NotificationServiceClass extends BaseApiService<Notification> {
     type?: string;
     isRead?: boolean;
   }): Promise<PaginatedResponse<Notification>> {
-    const response = await this.getAll(params);
-    
-    // Map backend snake_case to frontend camelCase
-    if (response.data && Array.isArray(response.data)) {
-        response.data = response.data.map((item: any) => ({
-            id: item.id,
-            userId: item.user_id,
-            title: item.title,
-            message: item.message,
-            type: item.type,
-            refId: item.ref_id,
-            isRead: item.is_read || false,
-            createdAt: item.created_at,
-        }));
-    }
-    
-    return response;
+    return this.getAll(params);
   }
 }
 

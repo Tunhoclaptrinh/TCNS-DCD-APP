@@ -19,7 +19,7 @@ export const ORDER_STATUS_COLOR: Record<string, string> = {
   confirmed: "#4ECDC4", // Đã xác nhận
   preparing: "#FFB800", // Đang chuẩn bị
   shipping: "#3498DB", // Đang giao
-  on_the_way: "#3498DB", // Đồng nghĩa shipping
+  onTheWay: "#3498DB", // Đồng nghĩa shipping
   delivered: COLORS.SUCCESS, // Đã giao
   cancelled: COLORS.ERROR, // Đã hủy
 };
