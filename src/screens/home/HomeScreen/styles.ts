@@ -1,9 +1,9 @@
-import {COLORS} from "@/src/styles/colors";
-import {Dimensions, Platform, StyleSheet} from "react-native";
-const {width} = Dimensions.get("window");
+import { COLORS } from "@/src/styles/colors";
+import { Dimensions, Platform, StyleSheet } from "react-native";
+const { width } = Dimensions.get("window");
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: "#FAFAFA"},
+  container: { flex: 1, backgroundColor: "#FAFAFA" },
   headerContainer: {
     paddingHorizontal: 12,
     paddingTop: Platform.OS === "android" ? 10 : 0,
@@ -12,15 +12,15 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 8,
     borderBottomRightRadius: 8,
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
     zIndex: 10,
   },
-  greetingSection: {flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8},
-  greeting: {fontSize: 22, fontWeight: "800", color: COLORS.DARK},
-  greetingSubtitle: {fontSize: 13, color: COLORS.GRAY},
+  greetingSection: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  greeting: { fontSize: 22, fontWeight: "800", color: COLORS.DARK },
+  greetingSubtitle: { fontSize: 13, color: COLORS.GRAY },
   notificationButton: {
     width: 40,
     height: 40,
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderRadius: 8,
   },
-  badgeText: {color: "white", fontSize: 10, fontWeight: "bold"},
+  badgeText: { color: "white", fontSize: 10, fontWeight: "bold" },
 
   locationIconBg: {
     width: 36,
@@ -48,17 +48,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 10,
   },
-  locationTextContainer: {flex: 1},
-  locationLabel: {fontSize: 11, color: COLORS.GRAY},
-  locationAddress: {fontSize: 13, fontWeight: "600", color: COLORS.DARK},
+  locationTextContainer: { flex: 1 },
+  locationLabel: { fontSize: 11, color: COLORS.GRAY },
+  locationAddress: { fontSize: 13, fontWeight: "600", color: COLORS.DARK },
 
-  searchSection: {flexDirection: "row", gap: 8, marginBottom: 8},
-  iconButton: {width: 50, height: 50, borderRadius: 8, justifyContent: "center", alignItems: "center"},
-  filterButton: {backgroundColor: COLORS.PRIMARY, shadowColor: COLORS.PRIMARY, shadowOpacity: 0.3, elevation: 4},
+  searchSection: { flexDirection: "row", gap: 8, marginBottom: 8 },
+  iconButton: { width: 50, height: 50, borderRadius: 8, justifyContent: "center", alignItems: "center" },
+  filterButton: { backgroundColor: COLORS.PRIMARY, shadowColor: COLORS.PRIMARY, shadowOpacity: 0.3, elevation: 4 },
 
-  categoriesSection: {marginBottom: 12},
-  categoriesContainer: {gap: 4, marginTop: 4},
-  categoryItem: {alignItems: "center", width: 64},
+  categoriesSection: { marginBottom: 12 },
+  categoriesContainer: { gap: 4, marginTop: 4 },
+  categoryItem: { alignItems: "center", width: 64 },
   categoryIconContainer: {
     width: 36,
     height: 36,
@@ -69,13 +69,13 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     overflow: "hidden",
   },
-  categoryIconContainerActive: {backgroundColor: COLORS.PRIMARY, borderWidth: 2, borderColor: "#FFD1D1"},
-  categoryImage: {width: "100%", height: "100%", borderRadius: 4},
-  categoryName: {fontSize: 11, fontWeight: "500", color: COLORS.DARK_GRAY, textAlign: "center"},
-  categoryNameActive: {color: COLORS.PRIMARY, fontWeight: "700"},
-  categoryItemActive: {transform: [{scale: 1.05}]},
+  categoryIconContainerActive: { backgroundColor: COLORS.PRIMARY, borderWidth: 2, borderColor: "#FFD1D1" },
+  categoryImage: { width: "100%", height: "100%", borderRadius: 4 },
+  categoryName: { fontSize: 11, fontWeight: "500", color: COLORS.DARK_GRAY, textAlign: "center" },
+  categoryNameActive: { color: COLORS.PRIMARY, fontWeight: "700" },
+  categoryItemActive: { transform: [{ scale: 1.05 }] },
 
-  bannersContainer: {gap: 12, marginBottom: 12, paddingRight: 20, paddingLeft: 4},
+  bannersContainer: { gap: 12, marginBottom: 12, paddingRight: 20, paddingLeft: 4 },
   bannerCard: {
     width: width - 160,
     borderRadius: 12,
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     height: 50,
     alignItems: "center",
   },
-  bannerContent: {flexDirection: "row", alignItems: "center", gap: 12, flex: 1},
+  bannerContent: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
   bannerIconBg: {
     width: 36,
     height: 36,
@@ -93,10 +93,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  bannerTitle: {fontSize: 16, fontWeight: "800", color: "white"},
-  bannerSubtitle: {fontSize: 12, color: "rgba(255,255,255,0.9)"},
+  bannerTitle: { fontSize: 16, fontWeight: "800", color: "white" },
+  bannerSubtitle: { fontSize: 12, color: "rgba(255,255,255,0.9)" },
 
-  tabContainer: {flexDirection: "row", backgroundColor: "#F3F4F6", padding: 4, borderRadius: 8, marginBottom: 4},
+  tabContainer: { flexDirection: "row", backgroundColor: "#F3F4F6", padding: 4, borderRadius: 8, marginBottom: 4 },
   tabButton: {
     flex: 1,
     flexDirection: "row",
@@ -106,14 +106,14 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     gap: 4,
   },
-  tabText: {fontSize: 12, fontWeight: "600", color: COLORS.GRAY},
-  tabTextActive: {color: COLORS.WHITE},
-  resultCountText: {fontSize: 11, color: COLORS.GRAY, textAlign: "center", marginTop: 4},
+  tabText: { fontSize: 12, fontWeight: "600", color: COLORS.GRAY },
+  tabTextActive: { color: COLORS.WHITE },
+  resultCountText: { fontSize: 11, color: COLORS.GRAY, textAlign: "center", marginTop: 4 },
 
-  map: {flex: 1},
+  map: { flex: 1 },
 
-  restaurantGrid: {gap: 16, marginTop: 10},
-  restaurantCard: {
+  itemGrid: { gap: 16, marginTop: 10 },
+  itemCard: {
     backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     shadowColor: "#000",
@@ -123,9 +123,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  restaurantImageContainer: {height: 160, backgroundColor: COLORS.LIGHT_GRAY, position: "relative"},
-  restaurantImage: {width: "100%", height: "100%"},
-  placeholderImage: {alignItems: "center", justifyContent: "center"},
+  itemImageContainer: { height: 160, backgroundColor: COLORS.LIGHT_GRAY, position: "relative" },
+  itemImage: { padding: 0, width: "100%", height: "100%" },
+  placeholderImage: { alignItems: "center", justifyContent: "center" },
 
   ratingBadge: {
     position: "absolute",
@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 4,
   },
-  ratingText: {fontSize: 12, fontWeight: "700", color: COLORS.WHITE},
+  ratingText: { fontSize: 12, fontWeight: "700", color: COLORS.WHITE },
 
   closedOverlay: {
     position: "absolute",
@@ -151,17 +151,17 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  closedText: {fontSize: 16, fontWeight: "800", color: COLORS.WHITE, letterSpacing: 1},
+  closedText: { fontSize: 16, fontWeight: "800", color: COLORS.WHITE, letterSpacing: 1 },
 
-  restaurantInfo: {padding: 12},
-  restaurantName: {fontSize: 16, fontWeight: "700", color: COLORS.DARK, marginBottom: 4},
-  metaRow: {flexDirection: "row", alignItems: "center"},
-  metaItem: {flexDirection: "row", alignItems: "center", gap: 4},
-  metaText: {fontSize: 12, color: COLORS.DARK_GRAY, fontWeight: "500"},
-  metaDivider: {width: 1, height: 12, backgroundColor: COLORS.LIGHT_GRAY, marginHorizontal: 8},
+  itemInfo: { padding: 12 },
+  itemName: { fontSize: 16, fontWeight: "700", color: COLORS.DARK, marginBottom: 4 },
+  metaRow: { flexDirection: "row", alignItems: "center" },
+  metaItem: { flexDirection: "row", alignItems: "center", gap: 4 },
+  metaText: { fontSize: 12, color: COLORS.DARK_GRAY, fontWeight: "500" },
+  metaDivider: { width: 1, height: 12, backgroundColor: COLORS.LIGHT_GRAY, marginHorizontal: 8 },
 
-  centerState: {flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 60},
-  loadingText: {marginTop: 12, fontSize: 14, color: COLORS.GRAY},
+  centerState: { flex: 1, justifyContent: "center", alignItems: "center", paddingVertical: 60 },
+  loadingText: { marginTop: 12, fontSize: 14, color: COLORS.GRAY },
 
   modalOverlay: {
     flex: 1,
@@ -183,12 +183,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: COLORS.LIGHT_GRAY,
   },
-  modalTitle: {fontSize: 18, fontWeight: "700", color: COLORS.DARK},
-  modalBody: {padding: 20},
-  modalRestaurantName: {fontSize: 20, fontWeight: "800", marginBottom: 4},
-  modalMetaRow: {flexDirection: "row", alignItems: "center"},
+  modalTitle: { fontSize: 18, fontWeight: "700", color: COLORS.DARK },
+  modalBody: { padding: 20 },
+  modalItemName: { fontSize: 20, fontWeight: "800", marginBottom: 4 },
+  modalMetaRow: { flexDirection: "row", alignItems: "center" },
 
-  filterSectionTitle: {fontSize: 14, fontWeight: "700", color: COLORS.DARK, marginBottom: 12, marginTop: 8},
+  filterSectionTitle: { fontSize: 14, fontWeight: "700", color: COLORS.DARK, marginBottom: 12, marginTop: 8 },
   filterOptionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -198,11 +198,11 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.LIGHT_GRAY,
     marginBottom: 8,
   },
-  filterOptionRowActive: {backgroundColor: "#FFF0F0", borderWidth: 1, borderColor: COLORS.PRIMARY},
-  filterOptionText: {fontSize: 14, color: COLORS.DARK},
-  filterOptionTextActive: {fontWeight: "600", color: COLORS.PRIMARY},
+  filterOptionRowActive: { backgroundColor: "#FFF0F0", borderWidth: 1, borderColor: COLORS.PRIMARY },
+  filterOptionText: { fontSize: 14, color: COLORS.DARK },
+  filterOptionTextActive: { fontWeight: "600", color: COLORS.PRIMARY },
 
-  ratingFilterContainer: {flexDirection: "row", gap: 8, marginBottom: 8},
+  ratingFilterContainer: { flexDirection: "row", gap: 8, marginBottom: 8 },
   ratingChip: {
     flexDirection: "row",
     alignItems: "center",
@@ -214,13 +214,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.LIGHT_GRAY,
   },
-  ratingChipActive: {backgroundColor: COLORS.PRIMARY, borderColor: COLORS.PRIMARY},
-  ratingChipText: {fontSize: 13, fontWeight: "600", color: COLORS.DARK},
-  ratingChipTextActive: {color: COLORS.WHITE},
+  ratingChipActive: { backgroundColor: COLORS.PRIMARY, borderColor: COLORS.PRIMARY },
+  ratingChipText: { fontSize: 13, fontWeight: "600", color: COLORS.DARK },
+  ratingChipTextActive: { color: COLORS.WHITE },
 
-  priceInputsContainer: {flexDirection: "row", alignItems: "center", gap: 8},
-  priceInputWrapper: {flex: 1},
-  priceSeparator: {fontSize: 18, color: COLORS.GRAY, fontWeight: "600", marginBottom: 16},
+  priceInputsContainer: { flexDirection: "row", alignItems: "center", gap: 8 },
+  priceInputWrapper: { flex: 1 },
+  priceSeparator: { fontSize: 18, color: COLORS.GRAY, fontWeight: "600", marginBottom: 16 },
 
   modalFooter: {
     flexDirection: "row",
@@ -284,7 +284,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     backgroundColor: COLORS.WHITE,
   },
-  copyText: {fontSize: 13, fontWeight: "600", color: COLORS.PRIMARY},
+  copyText: { fontSize: 13, fontWeight: "600", color: COLORS.PRIMARY },
   promoDescription: {
     fontSize: 14,
     color: COLORS.GRAY,
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.PRIMARY,
     borderRadius: 10,
     shadowColor: COLORS.PRIMARY,
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#F0F0F0",
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.05,
     shadowRadius: 2,
     elevation: 1,

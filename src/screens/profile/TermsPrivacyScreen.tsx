@@ -6,17 +6,16 @@ export default function TermsPrivacyScreen() {
     <ScrollView style={{ flex: 1, backgroundColor: "#fff" }}>
       <View style={{ padding: 20 }}>
         <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 16, color: COLORS.PRIMARY }}>
-          Về SEN
+          Về Ứng dụng
         </Text>
-        
+
         <Text style={{ fontSize: 16, lineHeight: 28, marginBottom: 24, color: "#333", textAlign: 'justify' }}>
-          Chào mừng bạn đến với <Text style={{fontWeight: 'bold', color: COLORS.PRIMARY}}>SEN</Text> - Ứng dụng khám phá và tôn vinh Di sản Văn hóa Việt Nam.
+          Chào mừng bạn đến với <Text style={{ fontWeight: 'bold', color: COLORS.PRIMARY }}>Base App</Text> - Một nền tảng khung (boilerplate) hiện đại cho ứng dụng mobile.
           {"\n"}
-          SEN không chỉ là một lăng kính số soi chiếu hàng ngàn năm lịch sử, mà còn là một <Text style={{fontWeight: 'bold'}}>trò chơi giáo dục tương tác</Text>, 
-          nơi bạn nhập vai, khám phá và giải mã những câu chuyện hào hùng của ông cha.
+          Ứng dụng này cung cấp các tính năng nền tảng như xác thực, phân quyền, trợ lý AI và quản lý tài khoản, giúp bạn tập trung vào việc phát triển các tính năng nghiệp vụ chính.
           {"\n\n"}
-          Với sứ mệnh <Text style={{fontWeight: 'bold'}}>truyền bá và lan tỏa niềm yêu thích lịch sử</Text>, chúng tôi kết hợp công nghệ hiện đại với kho tàng văn hóa đồ sộ, 
-          biến việc <Text style={{fontWeight: 'bold', color: COLORS.PRIMARY}}>học lịch sử</Text> trở nên sống động, lôi cuốn và đầy cảm hứng ngay trên thiết bị của bạn.
+          Với kiến trúc <Text style={{ fontWeight: 'bold' }}>Module-based</Text> và tích hợp sẵn công nghệ <Text style={{ fontWeight: 'bold', color: COLORS.PRIMARY }}>React Native & Expo</Text>,
+          Base App mang đến trải nghiệm mượt mà, hiệu năng cao và dễ dàng tùy biến theo nhu cầu của bạn.
         </Text>
 
         <View style={{ height: 1, backgroundColor: "#EEEEEE", marginBottom: 24 }} />
@@ -26,23 +25,19 @@ export default function TermsPrivacyScreen() {
         </Text>
 
         <View style={{ gap: 16 }}>
-             {[
-               { name: "Nguyễn Tiến Tuấn", phone: "0945650883", email: "tuannguyentien16@gmail.com" },
-                { name: "Nguyễn Văn Hiếu", phone: "0917579522", email: "nguyenhieu32005@gmail.com" },
-                { name: "Phan Thị Thu Nguyệt", phone: "0389829196", email: "phanthithunguyet628@gmail.com" },
-                { name: "Trần Thành Duy", phone: "0866028877", email: "dandythenubit@gmail.com" },
-                { name: "Bùi Thị Yến", phone: "0389829196", email: "buiyen2004yen@gmail.com" }
-             ].map((member, index) => (
-                 <View key={index} style={{ backgroundColor: "#FAFAFA", padding: 16, borderRadius: 12 }}>
-                     <Text style={{ fontSize: 16, fontWeight: "bold", color: "#333", marginBottom: 4 }}>{member.name}</Text>
-                     <Text style={{ fontSize: 14, color: "#666" }}>📞 {member.phone}</Text>
-                     <Text style={{ fontSize: 14, color: "#666" }}>✉️ {member.email}</Text>
-                 </View>
-             ))}
+          {[
+            { name: "Development Team", phone: "+84 123 456 789", email: "support@baseapp.com" }
+          ].map((member, index) => (
+            <View key={index} style={{ backgroundColor: "#FAFAFA", padding: 16, borderRadius: 12 }}>
+              <Text style={{ fontSize: 16, fontWeight: "bold", color: "#333", marginBottom: 4 }}>{member.name}</Text>
+              <Text style={{ fontSize: 14, color: "#666" }}>📞 {member.phone}</Text>
+              <Text style={{ fontSize: 14, color: "#666" }}>✉️ {member.email}</Text>
+            </View>
+          ))}
         </View>
 
         <Text style={{ fontSize: 14, color: "#999", textAlign: "center", marginTop: 40, marginBottom: 20 }}>
-          Phiên bản 1.0.0 - Made with ❤️ by Team SEN
+          Phiên bản 2.1.0 - Made with ❤️ by Base Team
         </Text>
       </View>
     </ScrollView>

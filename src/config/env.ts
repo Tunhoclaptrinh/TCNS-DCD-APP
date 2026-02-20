@@ -4,14 +4,26 @@ const ENV = {
   development: {
     apiUrl: process.env.EXPO_PUBLIC_API_URL_DEV!,
     logLevel: "debug",
+    storageKeys: {
+      token: process.env.EXPO_PUBLIC_STORAGE_TOKEN_KEY || "base_token",
+      user: process.env.EXPO_PUBLIC_STORAGE_USER_KEY || "base_user",
+    },
   },
   staging: {
-    apiUrl: "https://staging-api.sen.com",
+    apiUrl: "https://staging-api.baseproject.dev",
     logLevel: "info",
+    storageKeys: {
+      token: process.env.EXPO_PUBLIC_STORAGE_TOKEN_KEY || "base_token",
+      user: process.env.EXPO_PUBLIC_STORAGE_USER_KEY || "base_user",
+    },
   },
   production: {
     apiUrl: process.env.EXPO_PUBLIC_API_URL!,
     logLevel: "warn",
+    storageKeys: {
+      token: process.env.EXPO_PUBLIC_STORAGE_TOKEN_KEY || "base_token",
+      user: process.env.EXPO_PUBLIC_STORAGE_USER_KEY || "base_user",
+    },
   },
 };
 

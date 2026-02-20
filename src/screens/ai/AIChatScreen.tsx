@@ -38,13 +38,13 @@ const AIChatScreen = ({ navigation }: any) => {
     try {
       const response = await AIService.sendMessage(userMsg.content);
       const reply = response.data?.reply || "Xin lỗi, tôi không hiểu ý bạn.";
-      
+
       const assistantMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
         content: reply,
       };
-      
+
       setMessages(prev => [...prev, assistantMsg]);
     } catch (error) {
       console.error("AI Error:", error);
@@ -63,7 +63,7 @@ const AIChatScreen = ({ navigation }: any) => {
     const isUser = item.role === 'user';
     return (
       <View style={[
-        styles.messageBubble, 
+        styles.messageBubble,
         isUser ? styles.userBubble : styles.assistantBubble
       ]}>
         <Text style={[styles.messageText, isUser ? styles.userText : styles.assistantText]}>
@@ -76,11 +76,11 @@ const AIChatScreen = ({ navigation }: any) => {
   useEffect(() => {
     // Check if initial greeting is needed
     if (messages.length === 0) {
-        setMessages([{
-            id: 'init',
-            role: 'assistant',
-            content: 'Xin chào! Tôi là trợ lý ảo SEN. Tôi có thể giúp gì cho bạn về di sản văn hóa Việt Nam?'
-        }]);
+      setMessages([{
+        id: 'init',
+        role: 'assistant',
+        content: 'Xin chào! Tôi là trợ lý ảo. Tôi có thể giúp gì cho bạn?'
+      }]);
     }
   }, []);
 
@@ -89,10 +89,10 @@ const AIChatScreen = ({ navigation }: any) => {
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.WHITE} />
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Ionicons name="close" size={24} color={COLORS.DARK} />
+          <Ionicons name="close" size={24} color={COLORS.DARK} />
         </TouchableOpacity>
-        <Text style={styles.title}>Trợ lý ảo SEN</Text>
-        <View style={{width: 24}} /> 
+        <Text style={styles.title}>Trợ lý ảo</Text>
+        <View style={{ width: 24 }} />
       </View>
 
       <FlatList
@@ -117,15 +117,15 @@ const AIChatScreen = ({ navigation }: any) => {
             placeholderTextColor={COLORS.GRAY}
             multiline
           />
-          <TouchableOpacity 
-            style={[styles.sendBtn, !inputText.trim() && styles.disabledBtn]} 
+          <TouchableOpacity
+            style={[styles.sendBtn, !inputText.trim() && styles.disabledBtn]}
             onPress={sendMessage}
             disabled={!inputText.trim() || loading}
           >
             {loading ? (
-                <ActivityIndicator size="small" color={COLORS.WHITE} />
+              <ActivityIndicator size="small" color={COLORS.WHITE} />
             ) : (
-                <Ionicons name="send" size={20} color={COLORS.WHITE} />
+              <Ionicons name="send" size={20} color={COLORS.WHITE} />
             )}
           </TouchableOpacity>
         </View>
@@ -140,81 +140,81 @@ const styles = StyleSheet.create({
     backgroundColor: "#F5F5F5",
   },
   header: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: 16,
-      backgroundColor: COLORS.WHITE,
-      borderBottomWidth: 1,
-      borderBottomColor: '#EEE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    backgroundColor: COLORS.WHITE,
+    borderBottomWidth: 1,
+    borderBottomColor: '#EEE',
   },
   backButton: {
-      padding: 4,
+    padding: 4,
   },
   title: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: COLORS.DARK,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: COLORS.DARK,
   },
   listContent: {
-      padding: 16,
-      paddingBottom: 20,
+    padding: 16,
+    paddingBottom: 20,
   },
   messageBubble: {
-      maxWidth: '80%',
-      padding: 12,
-      borderRadius: 16,
-      marginBottom: 12,
+    maxWidth: '80%',
+    padding: 12,
+    borderRadius: 16,
+    marginBottom: 12,
   },
   userBubble: {
-      alignSelf: 'flex-end',
-      backgroundColor: COLORS.PRIMARY,
-      borderBottomRightRadius: 4,
+    alignSelf: 'flex-end',
+    backgroundColor: COLORS.PRIMARY,
+    borderBottomRightRadius: 4,
   },
   assistantBubble: {
-      alignSelf: 'flex-start',
-      backgroundColor: COLORS.WHITE,
-      borderBottomLeftRadius: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: COLORS.WHITE,
+    borderBottomLeftRadius: 4,
   },
   messageText: {
-      fontSize: 15,
-      lineHeight: 22,
+    fontSize: 15,
+    lineHeight: 22,
   },
   userText: {
-      color: COLORS.WHITE,
+    color: COLORS.WHITE,
   },
   assistantText: {
-      color: COLORS.DARK,
+    color: COLORS.DARK,
   },
   inputContainer: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      padding: 16,
-      backgroundColor: COLORS.WHITE,
-      borderTopWidth: 1,
-      borderTopColor: '#EEE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: COLORS.WHITE,
+    borderTopWidth: 1,
+    borderTopColor: '#EEE',
   },
   input: {
-      flex: 1,
-      backgroundColor: '#F0F0F0',
-      borderRadius: 24,
-      paddingHorizontal: 16,
-      paddingVertical: 10,
-      marginRight: 12,
-      maxHeight: 100,
-      color: COLORS.DARK,
+    flex: 1,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 24,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginRight: 12,
+    maxHeight: 100,
+    color: COLORS.DARK,
   },
   sendBtn: {
-      width: 44,
-      height: 44,
-      borderRadius: 22,
-      backgroundColor: COLORS.PRIMARY,
-      justifyContent: 'center',
-      alignItems: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: COLORS.PRIMARY,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   disabledBtn: {
-      backgroundColor: COLORS.GRAY,
-      opacity: 0.5,
+    backgroundColor: COLORS.GRAY,
+    opacity: 0.5,
   }
 });
 

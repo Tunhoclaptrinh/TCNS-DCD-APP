@@ -1,31 +1,31 @@
-import React, {useState, useEffect} from "react";
-import {View, ScrollView, StyleSheet, Text, Switch, TouchableOpacity, Alert} from "react-native";
+import React, { useState, useEffect } from "react";
+import { View, ScrollView, StyleSheet, Text, Switch, TouchableOpacity, Alert } from "react-native";
 import SafeAreaView from "@/src/components/common/SafeAreaView";
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import Button from "@/src/components/common/Button";
-import {COLORS} from "@/src/styles/colors";
+import { COLORS } from "@/src/styles/colors";
 
-const NotificationSettingsScreen = ({navigation}: any) => {
+const NotificationSettingsScreen = ({ navigation }: any) => {
   const [settings, setSettings] = useState({
     pushNotifications: true,
     orderUpdates: true,
     promotions: true,
-    newRestaurants: false,
+    newFeatures: false,
     emailNotifications: true,
     smsNotifications: false,
   });
   const [loading, setLoading] = useState(false);
 
   const handleToggle = (key: keyof typeof settings) => {
-    setSettings({...settings, [key]: !settings[key]});
+    setSettings({ ...settings, [key]: !settings[key] });
   };
 
   const handleSave = async () => {
     setLoading(true);
     try {
-      // TODO: API call to save settings
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      Alert.alert("Success", "Notification preferences saved");
+      // Simulate API call to save settings
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      Alert.alert("Thành công", "Đã lưu cài đặt thông báo");
     } catch (error) {
       Alert.alert("Error", "Failed to save preferences");
     } finally {
@@ -46,20 +46,20 @@ const NotificationSettingsScreen = ({navigation}: any) => {
         {
           key: "orderUpdates" as const,
           icon: "receipt",
-          label: "Order Updates",
-          subtitle: "Get notified about your order status",
+          label: "Cập nhật hệ thống",
+          subtitle: "Nhận thông báo về trạng thái tài khoản",
         },
         {
           key: "promotions" as const,
           icon: "pricetag",
-          label: "Promotions & Offers",
-          subtitle: "Receive special deals and discounts",
+          label: "Khuyến mãi & Tin tức",
+          subtitle: "Nhận các ưu đãi đặc biệt",
         },
         {
-          key: "newRestaurants" as const,
-          icon: "storefront",
-          label: "New Restaurants",
-          subtitle: "Get notified when new restaurants join",
+          key: "newFeatures" as const,
+          icon: "apps",
+          label: "Cập nhật tính năng",
+          subtitle: "Nhận thông báo khi có tính năng mới",
         },
       ],
     },
@@ -107,7 +107,7 @@ const NotificationSettingsScreen = ({navigation}: any) => {
                 <Switch
                   value={settings[item.key]}
                   onValueChange={() => handleToggle(item.key)}
-                  trackColor={{false: "#E5E7EB", true: COLORS.PRIMARY}}
+                  trackColor={{ false: "#E5E7EB", true: COLORS.PRIMARY }}
                   thumbColor={COLORS.WHITE}
                 />
               </View>

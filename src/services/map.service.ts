@@ -28,7 +28,7 @@ export interface MapMarker {
   coordinate: Location;
   title: string;
   description?: string;
-  type: "restaurant" | "delivery" | "current";
+  type: "location" | "point" | "current";
   icon?: string;
 }
 

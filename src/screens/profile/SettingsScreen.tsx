@@ -1,36 +1,36 @@
 // src/screens/profile/SettingsScreen.tsx
 import React from "react";
-import {View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/src/store";
-import { 
-  setTheme, 
-  setLanguage, 
-  toggleNotifications, 
-  toggleBiometrics 
+import {
+  setTheme,
+  setLanguage,
+  toggleNotifications,
+  toggleBiometrics
 } from "@/src/store/slices/settingsSlice";
 import { logout } from "@/src/store/slices/authSlice";
 
 import SafeAreaView from "@/src/components/common/SafeAreaView";
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication"; // Import thư viện
-import {useTheme} from "@/src/hooks/useTheme"; // Import theme hook
-import {useTranslation} from "@/src/utils/i18n"; // Import i18n hook
+import { useTheme } from "@/src/hooks/useTheme"; // Import theme hook
+import { useTranslation } from "@/src/utils/i18n"; // Import i18n hook
 
-const SettingsScreen = ({navigation}: any) => {
+const SettingsScreen = ({ navigation }: any) => {
   const dispatch = useDispatch<any>();
   // Sử dụng hook Theme và Translation - giả định các hook này vẫn hoạt động hoặc sẽ được fix sau nếu lỗi
   // Nếu useTheme/useTranslation phụ thuộc vào store cũ, chúng cũng cần được refactor.
   // Tuy nhiên, ưu tiên fix lỗi build do import sai trước.
-  const {colors, isDark} = useTheme(); 
-  const {t, locale} = useTranslation();
+  const { colors, isDark } = useTheme();
+  const { t, locale } = useTranslation();
 
   const { language, notificationsEnabled, biometricsEnabled } = useSelector((state: RootState) => state.settings);
   // Theme hiện tại đang được lấy từ useTheme hook, có thể bị conflict với store. 
   // Để an toàn, ta tạm thời tin tưởng useTheme điều khiển UI, và settings store lưu trạng thái.
 
   const handleLogout = () => {
-      dispatch(logout());
+    dispatch(logout());
   };
 
   // Xử lý bật/tắt Sinh trắc học thực tế
@@ -68,7 +68,7 @@ const SettingsScreen = ({navigation}: any) => {
 
   const handleClearCache = () => {
     Alert.alert(t("clearCache"), "Bạn có chắc chắn không?", [
-      {text: t("cancel"), style: "cancel"},
+      { text: t("cancel"), style: "cancel" },
       {
         text: t("confirm"),
         onPress: () => Alert.alert(t("success"), t("cacheCleared")),
@@ -78,7 +78,7 @@ const SettingsScreen = ({navigation}: any) => {
 
   // Helper render section (có style động theo theme)
   const renderSectionHeader = (title: string) => (
-    <Text style={[styles.sectionHeader, {color: colors.TEXT_SECONDARY}]}>{title}</Text>
+    <Text style={[styles.sectionHeader, { color: colors.TEXT_SECONDARY }]}>{title}</Text>
   );
 
   // Helper render item (có style động theo theme)
@@ -90,23 +90,23 @@ const SettingsScreen = ({navigation}: any) => {
     iconColor: string = colors.PRIMARY
   ) => (
     <TouchableOpacity
-      style={[styles.itemContainer, {backgroundColor: colors.CARD_BG, borderColor: colors.BORDER}]}
+      style={[styles.itemContainer, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}
       onPress={onPress}
       disabled={!onPress}
       activeOpacity={0.7}
     >
       <View style={styles.itemLeft}>
-        <View style={[styles.iconBox, {backgroundColor: iconColor + "15"}]}>
+        <View style={[styles.iconBox, { backgroundColor: iconColor + "15" }]}>
           <Ionicons name={icon as any} size={20} color={iconColor} />
         </View>
-        <Text style={[styles.itemLabel, {color: colors.TEXT_PRIMARY}]}>{label}</Text>
+        <Text style={[styles.itemLabel, { color: colors.TEXT_PRIMARY }]}>{label}</Text>
       </View>
       <View style={styles.itemRight}>{rightElement}</View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={[styles.container, {backgroundColor: colors.BACKGROUND}]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
       <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
         {/* --- Giao diện & Ngôn ngữ --- */}
         {renderSectionHeader(t("general"))}
@@ -114,16 +114,16 @@ const SettingsScreen = ({navigation}: any) => {
         {renderItem(
           "language-outline",
           t("language"),
-          <View style={{flexDirection: "row", alignItems: "center"}}>
-            <Text style={[styles.valueText, {color: colors.TEXT_SECONDARY}]}>
+          <View style={{ flexDirection: "row", alignItems: "center" }}>
+            <Text style={[styles.valueText, { color: colors.TEXT_SECONDARY }]}>
               {locale === "vi" ? "Tiếng Việt" : "English"}
             </Text>
             <Ionicons name="chevron-forward" size={20} color={colors.TEXT_SECONDARY} />
           </View>,
           () => {
             Alert.alert(t("language"), "", [
-              {text: "Tiếng Việt", onPress: () => dispatch(setLanguage("vi"))},
-              {text: "English", onPress: () => dispatch(setLanguage("en"))},
+              { text: "Tiếng Việt", onPress: () => dispatch(setLanguage("vi")) },
+              { text: "English", onPress: () => dispatch(setLanguage("en")) },
             ]);
           },
           "#4CAF50"
@@ -132,14 +132,14 @@ const SettingsScreen = ({navigation}: any) => {
         {renderItem(
           isDark ? "moon" : "sunny",
           t("theme"),
-          <View style={{flexDirection: "row", alignItems: "center", gap: 8}}>
-            <Text style={[styles.valueText, {color: colors.TEXT_SECONDARY}]}>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+            <Text style={[styles.valueText, { color: colors.TEXT_SECONDARY }]}>
               {isDark ? t("themeDark") : t("themeLight")}
             </Text>
             <Switch
               value={isDark}
               onValueChange={(val) => dispatch(setTheme(val ? "dark" : "light"))}
-              trackColor={{false: "#E5E7EB", true: colors.PRIMARY}}
+              trackColor={{ false: "#E5E7EB", true: colors.PRIMARY }}
               thumbColor="#FFFFFF"
             />
           </View>,
@@ -156,7 +156,7 @@ const SettingsScreen = ({navigation}: any) => {
           <Switch
             value={biometricsEnabled}
             onValueChange={handleBiometricsToggle} // Sử dụng hàm xử lý thực tế
-            trackColor={{false: "#E5E7EB", true: colors.PRIMARY}}
+            trackColor={{ false: "#E5E7EB", true: colors.PRIMARY }}
             thumbColor="#FFFFFF"
           />,
           undefined,
@@ -169,7 +169,7 @@ const SettingsScreen = ({navigation}: any) => {
           <Switch
             value={notificationsEnabled}
             onValueChange={() => dispatch(toggleNotifications())}
-            trackColor={{false: "#E5E7EB", true: colors.PRIMARY}}
+            trackColor={{ false: "#E5E7EB", true: colors.PRIMARY }}
             thumbColor="#FFFFFF"
           />,
           undefined,
@@ -190,7 +190,7 @@ const SettingsScreen = ({navigation}: any) => {
         {renderItem(
           "information-circle-outline",
           t("version"),
-          <Text style={[styles.valueText, {color: colors.TEXT_SECONDARY}]}>1.0.0</Text>,
+          <Text style={[styles.valueText, { color: colors.TEXT_SECONDARY }]}>1.0.0</Text>,
           undefined,
           colors.INFO
         )}
@@ -200,7 +200,7 @@ const SettingsScreen = ({navigation}: any) => {
           <Text style={styles.logoutText}>{t("logout")}</Text>
         </TouchableOpacity>
 
-        <Text style={[styles.footerText, {color: colors.TEXT_SECONDARY}]}>SEN Mobile App © 2025</Text>
+        <Text style={[styles.footerText, { color: colors.TEXT_SECONDARY }]}>Base App © 2026</Text>
       </ScrollView>
     </SafeAreaView>
   );
@@ -234,7 +234,7 @@ const styles = StyleSheet.create({
     borderColor: "transparent", // Sẽ được ghi đè bởi inline style
     // Shadow nhẹ
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 1},
+    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.03,
     shadowRadius: 2,
     elevation: 1,

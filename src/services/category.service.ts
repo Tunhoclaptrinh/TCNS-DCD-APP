@@ -1,6 +1,6 @@
 /**
  * Category Service
- * Handles fetching categories for heritage sites
+ * Handles fetching categories
  */
 class CategoryServiceClass {
   async getAll() {

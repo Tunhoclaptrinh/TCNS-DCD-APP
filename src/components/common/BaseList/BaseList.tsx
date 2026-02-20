@@ -1,9 +1,9 @@
-import {useEffect} from "react";
-import {FlatList, RefreshControl, View, StyleSheet, ActivityIndicator, Text} from "react-native";
+import { useEffect } from "react";
+import { FlatList, RefreshControl, View, StyleSheet, ActivityIndicator, Text } from "react-native";
 import EmptyState from "../EmptyState/EmptyState";
-import {COLORS} from "@/src/styles/colors";
-import {BaseListProps} from "./types";
-import {styles} from "./styles";
+import { COLORS } from "@/src/styles/colors";
+import { BaseListProps } from "./types";
+import { styles } from "./styles";
 
 /**
  * Enhanced BaseList Component
@@ -29,14 +29,14 @@ import {styles} from "./styles";
  *   fetchAll={fetchAll}
  *   fetchMore={fetchMore}
  *   refresh={refresh}
- *   renderItem={(item) => <RestaurantCard restaurant={item} />}
+ *   renderItem={(item) => <ItemCard item={item} />}
  *   keyExtractor={(item) => item.id.toString()}
- *   emptyTitle="No restaurants found"
+ *   emptyTitle="No items found"
  *   emptyAction={{
  *     label: "Explore",
  *     onPress: () => navigation.navigate("Home")
  *   }}
- *   renderSkeleton={() => <RestaurantCardSkeleton />}
+ *   renderSkeleton={() => <ItemCardSkeleton />}
  * />
  * ```
  */
@@ -92,7 +92,7 @@ function BaseList<T>({
     return (
       <View style={styles.container}>
         {ListHeaderComponent}
-        {Array.from({length: skeletonCount}).map((_, index) => (
+        {Array.from({ length: skeletonCount }).map((_, index) => (
           <SkeletonComponent key={`skeleton-${index}`} />
         ))}
       </View>
@@ -121,10 +121,10 @@ function BaseList<T>({
           primaryAction={
             onRetry
               ? {
-                  label: "Retry",
-                  onPress: onRetry,
-                  leftIcon: "refresh-outline",
-                }
+                label: "Retry",
+                onPress: onRetry,
+                leftIcon: "refresh-outline",
+              }
               : undefined
           }
         />
@@ -150,7 +150,7 @@ function BaseList<T>({
   return (
     <FlatList
       data={items}
-      renderItem={({item, index}) => renderItem(item, index)}
+      renderItem={({ item, index }) => renderItem(item, index)}
       keyExtractor={keyExtractor}
       refreshControl={
         <RefreshControl

@@ -1,10 +1,10 @@
 import React from "react";
-import {View, Text, StyleSheet, ViewStyle} from "react-native";
-import {Ionicons} from "@expo/vector-icons";
+import { View, Text, StyleSheet, ViewStyle } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 import Button from "../Button"; // Import enhanced Button
-import {styles} from "./styles";
-import {EmptyStateProps} from "./types";
-import {COLORS} from "@/src/styles/colors";
+import { styles } from "./styles";
+import { EmptyStateProps } from "./types";
+import { COLORS } from "@/src/styles/colors";
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
@@ -21,7 +21,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   containerStyle,
 }) => {
   // Get icon and color based on variant
-  const getVariantConfig = (): {icon: IconName; color: string} => {
+  const getVariantConfig = (): { icon: IconName; color: string } => {
     switch (variant) {
       case "error":
         return {
@@ -51,7 +51,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({
   return (
     <View style={[styles.container, containerStyle]}>
       {/* Icon */}
-      <View style={[styles.iconContainer, {backgroundColor: config.color + "20"}]}>
+      <View style={[styles.iconContainer, { backgroundColor: config.color + "20" }]}>
         <Ionicons name={config.icon} size={iconSize} color={config.color} />
       </View>
 
@@ -108,7 +108,7 @@ export default EmptyState;
 <EmptyState
   icon="cart-outline"
   title="Your cart is empty"
-  subtitle="Add some delicious food to your cart"
+  subtitle="Thêm nội dung vào danh sách của bạn"
   primaryAction={{
     label: "Start Shopping",
     onPress: () => navigation.navigate("Home"),
@@ -147,7 +147,7 @@ export default EmptyState;
 <EmptyState
   icon="heart-outline"
   title="No favorites yet"
-  subtitle="Save your favorite restaurants and products"
+  subtitle="Lưu các mục và nội dung yêu thích của bạn"
   customContent={
     <View style={{ alignItems: "center" }}>
       <Image 
@@ -157,7 +157,7 @@ export default EmptyState;
     </View>
   }
   primaryAction={{
-    label: "Explore Restaurants",
+    label: "Khám phá ngay",
     onPress: () => navigation.navigate("Home"),
   }}
 />

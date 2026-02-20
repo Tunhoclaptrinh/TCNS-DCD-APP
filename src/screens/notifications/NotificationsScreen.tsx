@@ -1,25 +1,25 @@
-import {useEffect, useState} from "react";
-import {View, ScrollView, Text, TouchableOpacity, RefreshControl, ActivityIndicator, Alert} from "react-native";
+import { useEffect, useState } from "react";
+import { View, ScrollView, Text, TouchableOpacity, RefreshControl, ActivityIndicator, Alert } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/src/store";
-import { 
-    fetchNotifications, 
-    markAsRead, 
-    markAllAsRead, 
-    deleteNotification, 
-    clearAllNotifications 
+import {
+  fetchNotifications,
+  markAsRead,
+  markAllAsRead,
+  deleteNotification,
+  clearAllNotifications
 } from "@/src/store/slices/notificationSlice";
 
 import SafeAreaView from "@/src/components/common/SafeAreaView";
-import {Ionicons} from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import EmptyState from "@/src/components/common/EmptyState/EmptyState";
-import {COLORS} from "@/src/styles/colors";
-import {formatDistanceToNow} from "date-fns";
-import {vi} from "date-fns/locale";
+import { COLORS } from "@/src/styles/colors";
+import { formatDistanceToNow } from "date-fns";
+import { vi } from "date-fns/locale";
 import styles from "./styles";
 import { Notification } from "@/src/services/notification.service";
 
-const NotificationsScreen = ({navigation}: any) => {
+const NotificationsScreen = ({ navigation }: any) => {
   const dispatch = useDispatch<any>();
   const { items, loading, unreadCount } = useSelector((state: RootState) => state.notifications);
   const [selectedTab, setSelectedTab] = useState<"all" | "unread">("all");
@@ -30,7 +30,7 @@ const NotificationsScreen = ({navigation}: any) => {
   }, [dispatch]);
 
   const loadData = async () => {
-      await dispatch(fetchNotifications());
+    await dispatch(fetchNotifications());
   };
 
   const handleRefresh = async () => {
@@ -47,18 +47,17 @@ const NotificationsScreen = ({navigation}: any) => {
 
     // Navigate based on type
     if (notification.type === "order" && notification.refId) {
-       // Legacy handling or new heritage logic
+      // Legacy handling
       // navigation.navigate("OrderDetail", {orderId: notification.refId});
     } else if (notification.type === "promotion") {
       // navigation.navigate("Search");
     } else if (notification.type === "review" && notification.refId) {
-      // navigation.navigate("RestaurantDetail", {restaurantId: notification.refId});
     }
   };
 
   const handleDeleteNotification = (id: number, title: string) => {
     Alert.alert("Xóa thông báo", `Bạn có chắc muốn xóa "${title}"?`, [
-      {text: "Hủy", style: "cancel"},
+      { text: "Hủy", style: "cancel" },
       {
         text: "Xóa",
         onPress: () => dispatch(deleteNotification(id)),
@@ -73,14 +72,14 @@ const NotificationsScreen = ({navigation}: any) => {
       return;
     }
     Alert.alert("Đánh dấu đã đọc", "Đánh dấu tất cả thông báo là đã đọc?", [
-      {text: "Hủy", style: "cancel"},
-      {text: "Đồng ý", onPress: () => dispatch(markAllAsRead())},
+      { text: "Hủy", style: "cancel" },
+      { text: "Đồng ý", onPress: () => dispatch(markAllAsRead()) },
     ]);
   };
 
   const handleClearAll = () => {
     Alert.alert("Xóa tất cả", "Bạn có chắc muốn xóa tất cả thông báo?", [
-      {text: "Hủy", style: "cancel"},
+      { text: "Hủy", style: "cancel" },
       {
         text: "Xóa tất cả",
         onPress: () => dispatch(clearAllNotifications()),
@@ -198,7 +197,7 @@ const NotificationsScreen = ({navigation}: any) => {
               activeOpacity={0.7}
             >
               <View
-                style={[styles.notificationIcon, {backgroundColor: getNotificationColor(notification.type) + "20"}]}
+                style={[styles.notificationIcon, { backgroundColor: getNotificationColor(notification.type) + "20" }]}
               >
                 <Ionicons
                   name={getNotificationIcon(notification.type) as any}

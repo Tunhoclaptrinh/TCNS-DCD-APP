@@ -1,4 +1,4 @@
-export type FavoriteType = "restaurant" | "product";
+export type FavoriteType = "item" | "category" | "other";
 
 export interface Favorite {
   id: number;

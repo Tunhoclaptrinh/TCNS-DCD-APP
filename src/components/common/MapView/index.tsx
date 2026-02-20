@@ -1,23 +1,23 @@
 /**
  * MapView - Google Maps with Full Features
  * - Display map
- * - Show markers (restaurants, delivery points)
+ * - Show markers (locations, points of interest)
  * - Draw routes with polyline
  * - Track current location
  * - Directions API integration
  * - Added route to selected location on map
  */
 
-import React, {useEffect, useState, useRef} from "react";
-import {View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Alert, Platform} from "react-native";
-import ReactNativeMap, {Marker, Polyline, PROVIDER_GOOGLE, Region} from "react-native-maps";
+import React, { useEffect, useState, useRef } from "react";
+import { View, StyleSheet, TouchableOpacity, Text, ActivityIndicator, Alert, Platform } from "react-native";
+import ReactNativeMap, { Marker, Polyline, PROVIDER_GOOGLE, Region } from "react-native-maps";
 
 import * as Location from "expo-location";
-import {Ionicons} from "@expo/vector-icons";
-import {MapService, Location as MapLocation, DirectionsResult} from "@services/map.service";
-import {COLORS} from "@/src/styles/colors";
-import {MapViewProps} from "./types";
-import {styles} from "./styles";
+import { Ionicons } from "@expo/vector-icons";
+import { MapService, Location as MapLocation, DirectionsResult } from "@services/map.service";
+import { COLORS } from "@/src/styles/colors";
+import { MapViewProps } from "./types";
+import { styles } from "./styles";
 
 const MapView: React.FC<MapViewProps> = ({
   markers = [],
@@ -96,12 +96,12 @@ const MapView: React.FC<MapViewProps> = ({
     try {
       // Web platform check
       if (Platform.OS === "web") {
-        const mockLoc = {latitude: 21.0285, longitude: 105.8542};
+        const mockLoc = { latitude: 21.0285, longitude: 105.8542 };
         setCurrentLocation(mockLoc);
         return;
       }
 
-      const {status} = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") {
         Alert.alert("Quyền truy cập bị từ chối", "Vui lòng cấp quyền vị trí để sử dụng tính năng này");
         return;
@@ -111,8 +111,8 @@ const MapView: React.FC<MapViewProps> = ({
         accuracy: Location.Accuracy.High,
       });
 
-      const {latitude, longitude} = location.coords;
-      const coords = {latitude, longitude};
+      const { latitude, longitude } = location.coords;
+      const coords = { latitude, longitude };
       setCurrentLocation(coords);
       setRegion({
         ...region,
@@ -129,7 +129,7 @@ const MapView: React.FC<MapViewProps> = ({
    */
   const startTracking = async () => {
     try {
-      const {status} = await Location.requestForegroundPermissionsAsync();
+      const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== "granted") return;
 
       if (locationSubscription.current) {
@@ -143,8 +143,8 @@ const MapView: React.FC<MapViewProps> = ({
           timeInterval: 5000,
         },
         (location) => {
-          const {latitude, longitude} = location.coords;
-          const coords = {latitude, longitude};
+          const { latitude, longitude } = location.coords;
+          const coords = { latitude, longitude };
           setCurrentLocation(coords);
 
           if (mapRef.current) {
@@ -186,8 +186,8 @@ const MapView: React.FC<MapViewProps> = ({
    * Handle long press on map to select destination
    */
   const handleMapLongPress = (event: any) => {
-    const {latitude, longitude} = event.nativeEvent.coordinate;
-    const newDestination = {latitude, longitude};
+    const { latitude, longitude } = event.nativeEvent.coordinate;
+    const newDestination = { latitude, longitude };
 
     setSelectedDestination(newDestination);
     setShowSelectedRoute(true);
@@ -196,7 +196,7 @@ const MapView: React.FC<MapViewProps> = ({
     Alert.alert(
       "Điểm đến đã chọn",
       `Tọa độ: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}\nNhấn nút "X" để xóa đường đi.`,
-      [{text: "OK"}]
+      [{ text: "OK" }]
     );
   };
 
@@ -272,9 +272,9 @@ const MapView: React.FC<MapViewProps> = ({
    */
   const getMarkerColor = (type: string): string => {
     switch (type) {
-      case "restaurant":
+      case "location":
         return COLORS.PRIMARY;
-      case "delivery":
+      case "point":
         return COLORS.SUCCESS;
       case "current":
         return COLORS.INFO;
@@ -288,10 +288,10 @@ const MapView: React.FC<MapViewProps> = ({
    */
   const getMarkerIcon = (type: string): any => {
     switch (type) {
-      case "restaurant":
-        return "restaurant";
-      case "delivery":
+      case "location":
         return "location";
+      case "point":
+        return "pin";
       case "current":
         return "navigate-circle";
       default:
@@ -343,7 +343,7 @@ const MapView: React.FC<MapViewProps> = ({
             pinColor={COLORS.PRIMARY}
           >
             <View style={styles.markerContainer}>
-              <View style={[styles.markerIcon, {backgroundColor: COLORS.PRIMARY}]}>
+              <View style={[styles.markerIcon, { backgroundColor: COLORS.PRIMARY }]}>
                 <Ionicons name="flag" size={20} color={COLORS.WHITE} />
               </View>
             </View>
@@ -361,7 +361,7 @@ const MapView: React.FC<MapViewProps> = ({
             onPress={() => onMarkerPress?.(marker)}
           >
             <View style={styles.markerContainer}>
-              <View style={[styles.markerIcon, {backgroundColor: getMarkerColor(marker.type)}]}>
+              <View style={[styles.markerIcon, { backgroundColor: getMarkerColor(marker.type) }]}>
                 <Ionicons name={getMarkerIcon(marker.type) as any} size={20} color={COLORS.WHITE} />
               </View>
             </View>

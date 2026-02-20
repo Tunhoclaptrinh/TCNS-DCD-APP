@@ -6,8 +6,8 @@ export type RootStackParamList = {
   Cart: undefined;
   Orders: undefined;
   Profile: undefined;
-  RestaurantDetail: {restaurantId: number};
-  ProductDetail: {productId: number};
-  OrderDetail: {orderId: number};
+  ItemDetail: { id: number | string };
+  GenericDetail: { id: number | string; type?: string };
+  OrderDetail: { orderId: number | string };
   Checkout: undefined;
 };

@@ -23,6 +23,7 @@ export interface User extends BaseEntity {
   fullName: string;
   role: "user" | "admin" | "researcher";
   avatar?: string;
+  permissions?: string[];
   points: number;
   level: number;
   phone?: string;
@@ -47,26 +48,4 @@ export interface RegisterRequest {
   username: string;
   password?: string;
   fullName?: string;
-}
-
-export type FavoriteType = "restaurant" | "product" | "article";
-
-export interface Favorite {
-  id: number;
-  userId: number;
-  type: FavoriteType;
-  referenceId: number;
-  item?: any;
-  createdAt: string;
-}
-
-export interface Review {
-  id: number;
-  userId: number;
-  userName: string;
-  userAvatar?: string;
-  rating: number;
-  comment: string;
-  createdAt: string;
-  images?: string[];
 }
