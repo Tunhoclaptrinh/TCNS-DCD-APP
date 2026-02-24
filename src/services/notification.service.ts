@@ -2,8 +2,8 @@
  * Notification Service
  */
 
-import {BaseApiService, PaginatedResponse} from "@/src/base/BaseApiService";
-import {apiClient} from "@config/api.client";
+import {apiClient} from "../config/api.client";
+import {BaseApiResponse} from "../types/api.types";
 
 export interface Notification {
   id: number;
@@ -16,7 +16,7 @@ export interface Notification {
   createdAt: string;
 }
 
-class NotificationServiceClass extends BaseApiService<Notification> {
+class NotificationServiceClass {
   protected baseEndpoint = "/notifications";
 
   /**
@@ -50,7 +50,7 @@ class NotificationServiceClass extends BaseApiService<Notification> {
    * Delete notification
    */
   async deleteNotification(id: number): Promise<void> {
-    await this.delete(id);
+    await apiClient.delete(`${this.baseEndpoint}/${id}`);
   }
 
   /**
@@ -68,8 +68,15 @@ class NotificationServiceClass extends BaseApiService<Notification> {
     limit?: number;
     type?: string;
     isRead?: boolean;
-  }): Promise<PaginatedResponse<Notification>> {
-    return this.getAll(params);
+  }): Promise<BaseApiResponse<Notification[]>> {
+    const response = await apiClient.get<BaseApiResponse<Notification[]>>(this.baseEndpoint, params);
+    
+    // Support the possibility of data wrapping based on typical interceptor configs
+    if (response.data && Array.isArray((response.data as any).data)) {
+        return response.data as any;
+    }
+    
+    return response as unknown as BaseApiResponse<Notification[]>;
   }
 }
 
