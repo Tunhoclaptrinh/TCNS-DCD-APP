@@ -1,6 +1,6 @@
-import axios, {AxiosInstance, AxiosError} from "axios";
-import {API_CONFIG} from "../config/api.config";
-import {StorageService} from "../utils/storage";
+import axios, { AxiosInstance, AxiosError } from "axios";
+import { API_CONFIG } from "../config/api.config";
+import { StorageService } from "../utils/storage";
 
 class ApiClient {
   private client: AxiosInstance;
@@ -8,7 +8,7 @@ class ApiClient {
   constructor() {
     this.client = axios.create({
       baseURL: API_CONFIG.BASE_URL,
-      timeout: API_CONFIG.TIMEOUT,
+      timeout: API_CONFIG.TIMEOUT || 60000,
       headers: {
         "Content-Type": "application/json",
       },
@@ -48,7 +48,7 @@ class ApiClient {
   }
 
   get<T>(url: string, params?: any): Promise<T> {
-    return this.client.get(url, {params}) as Promise<T>;
+    return this.client.get(url, { params }) as Promise<T>;
   }
 
   post<T>(url: string, data?: any): Promise<T> {
