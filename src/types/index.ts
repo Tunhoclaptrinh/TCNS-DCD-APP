@@ -18,17 +18,20 @@ export interface Metadata {
 }
 
 export interface User extends BaseEntity {
-  username: string;
+  username?: string;
+  name: string;
   email: string;
-  fullName: string;
-  role: "user" | "admin" | "researcher";
+  fullName?: string; // Fallback for old code
+  role: "user" | "admin" | "researcher" | "customer";
   avatar?: string;
   permissions?: string[];
-  points: number;
-  level: number;
+  points?: number;
+  level?: number;
   phone?: string;
+  address?: string;
   bio?: string;
   lastLogin?: string;
+  isActive?: boolean;
 }
 
 export interface AuthResponse {
