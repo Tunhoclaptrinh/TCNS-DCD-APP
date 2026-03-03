@@ -1,8 +1,13 @@
 type AppEnv = "development" | "staging" | "production";
 
+const DEFAULT_API_URL =
+  process.env.EXPO_PUBLIC_API_URL ||
+  process.env.EXPO_PUBLIC_API_URL_DEV ||
+  "http://10.0.2.2:3000/api";
+
 const ENV = {
   development: {
-    apiUrl: process.env.EXPO_PUBLIC_API_URL_DEV!,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL_DEV || DEFAULT_API_URL,
     logLevel: "debug",
     storageKeys: {
       token: process.env.EXPO_PUBLIC_STORAGE_TOKEN_KEY || "base_token",
@@ -18,7 +23,7 @@ const ENV = {
     },
   },
   production: {
-    apiUrl: process.env.EXPO_PUBLIC_API_URL!,
+    apiUrl: process.env.EXPO_PUBLIC_API_URL || DEFAULT_API_URL,
     logLevel: "warn",
     storageKeys: {
       token: process.env.EXPO_PUBLIC_STORAGE_TOKEN_KEY || "base_token",
