@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   ScrollView,
@@ -12,18 +12,22 @@ import {
   Dimensions,
 } from "react-native";
 import SafeAreaView from "@/src/components/common/SafeAreaView";
-import {Ionicons} from "@expo/vector-icons";
-import {useSafeAreaInsets} from "react-native-safe-area-context";
-import {useAuth} from "@hooks/useAuth";
-import {apiClient} from "@config/api.client";
-import {LinearGradient} from "expo-linear-gradient";
-import {COLORS} from "@/src/styles/colors";
-import {getImageUrl} from "@/src/utils/formatters";
-import {ROUTE_NAMES} from "@/src/navigation";
-import {useDispatch, useSelector} from "react-redux";
-import {RootState} from "@/src/store";
-import {fetchNotifications, fetchUnreadCount} from "@/src/store/slices/notificationSlice";
-import {UserService} from "@/src/services/user.service";
+import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useAuth } from "@hooks/useAuth";
+import { useTheme } from "@hooks/useTheme";
+import { apiClient } from "@config/api.client";
+import { LinearGradient } from "expo-linear-gradient";
+import { COLORS } from "@/src/styles/colors";
+import { getImageUrl } from "@/src/utils/formatters";
+import { ROUTE_NAMES } from "@/src/navigation";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "@/src/store";
+import {
+  fetchNotifications,
+  fetchUnreadCount,
+} from "@/src/store/slices/notificationSlice";
+import { UserService } from "@/src/services/user.service";
 
 interface UserStats {
   totalReviews: number;
@@ -34,8 +38,9 @@ interface UserStats {
 
 type TabType = "profile" | "activity" | "security";
 
-const ProfileScreen = ({navigation}: any) => {
-  const {user, signOut} = useAuth();
+const ProfileScreen = ({ navigation }: any) => {
+  const { user, signOut, refreshUser } = useAuth();
+  const { colors, isDark } = useTheme();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -44,7 +49,9 @@ const ProfileScreen = ({navigation}: any) => {
   const [activityLoading, setActivityLoading] = useState(false);
 
   const dispatch = useDispatch();
-  const {unreadCount} = useSelector((state: RootState) => state.notifications);
+  const { unreadCount } = useSelector(
+    (state: RootState) => state.notifications,
+  );
   const insets = useSafeAreaInsets();
 
   useEffect(() => {
@@ -54,10 +61,17 @@ const ProfileScreen = ({navigation}: any) => {
   }, []);
 
   const loadData = async () => {
-    if (!user) return;
     try {
       setLoading(true);
-      // Mock data for Base Project
+
+      // Fetch fresh user data from server
+      try {
+        await refreshUser();
+      } catch (error) {
+        console.error("Error refreshing user data:", error);
+      }
+
+      // Load user stats
       setStats({
         totalReviews: 0,
         avgRating: 0,
@@ -65,14 +79,8 @@ const ProfileScreen = ({navigation}: any) => {
         totalCollections: 0,
       });
 
-      setActivities([
-        {
-          type: "login",
-          title: "Welcome",
-          description: "Welcome to your Base App!",
-          createdAt: new Date().toISOString(),
-        },
-      ]);
+      // Load activities
+      setActivities([]);
     } catch (error) {
       console.error("Error loading profile data:", error);
     } finally {
@@ -89,7 +97,7 @@ const ProfileScreen = ({navigation}: any) => {
 
   const handleLogout = () => {
     Alert.alert("Logout", "Are you sure you want to log out?", [
-      {text: "Cancel", style: "cancel"},
+      { text: "Cancel", style: "cancel" },
       {
         text: "Logout",
         onPress: async () => {
@@ -101,31 +109,116 @@ const ProfileScreen = ({navigation}: any) => {
   };
 
   const renderTabs = () => (
-    <View style={styles.tabContainer}>
+    <View
+      style={[
+        styles.tabContainer,
+        { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER },
+      ]}
+    >
       <TouchableOpacity
-        style={[styles.tabButton, activeTab === "profile" && styles.activeTabButton]}
+        style={[
+          styles.tabButton,
+          activeTab === "profile" && [
+            styles.activeTabButton,
+            { backgroundColor: "#E8F5E9" },
+          ],
+        ]}
         onPress={() => setActiveTab("profile")}
       >
-        <Ionicons name="person-outline" size={18} color={activeTab === "profile" ? COLORS.PRIMARY : COLORS.GRAY} />
-        <Text style={[styles.tabText, activeTab === "profile" && styles.activeTabText]}>Profile</Text>
+        <Ionicons
+          name="person-outline"
+          size={18}
+          color={
+            activeTab === "profile" ? colors.PRIMARY : colors.TEXT_SECONDARY
+          }
+        />
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === "profile" && [
+              styles.activeTabText,
+              { color: colors.PRIMARY },
+            ],
+            {
+              color:
+                activeTab === "profile"
+                  ? colors.PRIMARY
+                  : colors.TEXT_SECONDARY,
+            },
+          ]}
+        >
+          Profile
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.tabButton, activeTab === "activity" && styles.activeTabButton]}
+        style={[
+          styles.tabButton,
+          activeTab === "activity" && [
+            styles.activeTabButton,
+            { backgroundColor: "#E8F5E9" },
+          ],
+        ]}
         onPress={() => setActiveTab("activity")}
       >
-        <Ionicons name="time-outline" size={18} color={activeTab === "activity" ? COLORS.PRIMARY : COLORS.GRAY} />
-        <Text style={[styles.tabText, activeTab === "activity" && styles.activeTabText]}>Activity</Text>
+        <Ionicons
+          name="time-outline"
+          size={18}
+          color={
+            activeTab === "activity" ? colors.PRIMARY : colors.TEXT_SECONDARY
+          }
+        />
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === "activity" && [
+              styles.activeTabText,
+              { color: colors.PRIMARY },
+            ],
+            {
+              color:
+                activeTab === "activity"
+                  ? colors.PRIMARY
+                  : colors.TEXT_SECONDARY,
+            },
+          ]}
+        >
+          Activity
+        </Text>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.tabButton, activeTab === "security" && styles.activeTabButton]}
+        style={[
+          styles.tabButton,
+          activeTab === "security" && [
+            styles.activeTabButton,
+            { backgroundColor: "#E8F5E9" },
+          ],
+        ]}
         onPress={() => setActiveTab("security")}
       >
         <Ionicons
           name="shield-checkmark-outline"
           size={18}
-          color={activeTab === "security" ? COLORS.PRIMARY : COLORS.GRAY}
+          color={
+            activeTab === "security" ? colors.PRIMARY : colors.TEXT_SECONDARY
+          }
         />
-        <Text style={[styles.tabText, activeTab === "security" && styles.activeTabText]}>Security</Text>
+        <Text
+          style={[
+            styles.tabText,
+            activeTab === "security" && [
+              styles.activeTabText,
+              { color: colors.PRIMARY },
+            ],
+            {
+              color:
+                activeTab === "security"
+                  ? colors.PRIMARY
+                  : colors.TEXT_SECONDARY,
+            },
+          ]}
+        >
+          Security
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -136,74 +229,226 @@ const ProfileScreen = ({navigation}: any) => {
       {stats && (
         <View style={styles.statsGridSection}>
           <TouchableOpacity
-            style={styles.statsCard}
+            style={[styles.statsCard, { backgroundColor: colors.CARD_BG }]}
             onPress={() => navigation.navigate("FavoritesList")}
             activeOpacity={0.7}
           >
-            <View style={[styles.statsCardIcon, {backgroundColor: "#FFF0F5"}]}>
+            <View
+              style={[
+                styles.statsCardIcon,
+                { backgroundColor: isDark ? "#4a2a3a" : "#FFF0F5" },
+              ]}
+            >
               <Ionicons name="heart" size={24} color="#E91E63" />
             </View>
-            <Text style={styles.statsCardValue}>{stats.totalFavorites}</Text>
-            <Text style={styles.statsCardLabel}>Favorites</Text>
+            <Text
+              style={[styles.statsCardValue, { color: colors.TEXT_PRIMARY }]}
+            >
+              {stats.totalFavorites}
+            </Text>
+            <Text
+              style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
+            >
+              Favorites
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.statsCard} activeOpacity={0.7}>
-            <View style={[styles.statsCardIcon, {backgroundColor: "#E6F7FF"}]}>
+          <TouchableOpacity
+            style={[styles.statsCard, { backgroundColor: colors.CARD_BG }]}
+            activeOpacity={0.7}
+          >
+            <View
+              style={[
+                styles.statsCardIcon,
+                { backgroundColor: isDark ? "#2a3a4a" : "#E6F7FF" },
+              ]}
+            >
               <Ionicons name="grid" size={24} color="#1890ff" />
             </View>
-            <Text style={styles.statsCardValue}>{stats.totalCollections || 0}</Text>
-            <Text style={styles.statsCardLabel}>Collections</Text>
+            <Text
+              style={[styles.statsCardValue, { color: colors.TEXT_PRIMARY }]}
+            >
+              {stats.totalCollections || 0}
+            </Text>
+            <Text
+              style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
+            >
+              Collections
+            </Text>
           </TouchableOpacity>
         </View>
       )}
 
       {/* Menu Items */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Account Settings</Text>
-        <View style={styles.menuContainer}>
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("EditProfile")}>
-            <View style={[styles.menuIcon, {backgroundColor: "#E8F5E9"}]}>
+        <Text
+          style={[
+            styles.sectionTitle,
+            { color: isDark ? colors.TEXT_SECONDARY : "#8f8989" },
+          ]}
+        >
+          Account Settings
+        </Text>
+        <View
+          style={[
+            styles.menuContainer,
+            { backgroundColor: isDark ? "#3a3a3a" : COLORS.WHITE },
+          ]}
+        >
+          <TouchableOpacity
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: isDark ? "#4a4a4a" : COLORS.WHITE,
+                borderBottomColor: isDark ? "#5a5a5a" : "#F5F5F5",
+              },
+            ]}
+            onPress={() => navigation.navigate("EditProfile")}
+          >
+            <View
+              style={[
+                styles.menuIcon,
+                { backgroundColor: isDark ? "#5a5a5a" : "#E8F5E9" },
+              ]}
+            >
               <Ionicons name="person" size={20} color={COLORS.PRIMARY} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Edit Profile</Text>
-              <Text style={styles.menuSubtitle}>Update personal information</Text>
+              <Text
+                style={[
+                  styles.menuTitle,
+                  { color: isDark ? COLORS.WHITE : COLORS.DARK },
+                ]}
+              >
+                Edit Profile
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubtitle,
+                  { color: isDark ? "#999" : COLORS.GRAY },
+                ]}
+              >
+                Update personal information
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.menuItem}
-            onPress={() => navigation.navigate(ROUTE_NAMES.COMMON.NOTIFICATIONS)}
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: isDark ? "#4a4a4a" : COLORS.WHITE,
+                borderBottomColor: isDark ? "#5a5a5a" : "#F5F5F5",
+              },
+            ]}
+            onPress={() =>
+              navigation.navigate(ROUTE_NAMES.COMMON.NOTIFICATIONS)
+            }
           >
-            <View style={[styles.menuIcon, {backgroundColor: "#FFF3E0"}]}>
-              <Ionicons name="notifications" size={20} color="#F57C00" />
+            <View
+              style={[
+                styles.menuIcon,
+                { backgroundColor: isDark ? "#5a5a5a" : "#FFF3E0" },
+              ]}
+            >
+              <Ionicons name="notifications" size={20} color={"#F57C00"} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Notifications</Text>
-              <Text style={styles.menuSubtitle}>{unreadCount} new alerts</Text>
+              <Text
+                style={[
+                  styles.menuTitle,
+                  { color: isDark ? COLORS.WHITE : COLORS.DARK },
+                ]}
+              >
+                Notifications
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubtitle,
+                  { color: isDark ? "#999" : COLORS.GRAY },
+                ]}
+              >
+                {unreadCount} new alerts
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("Settings")}>
-            <View style={[styles.menuIcon, {backgroundColor: "#F3E5F5"}]}>
-              <Ionicons name="settings" size={20} color="#8E24AA" />
+          <TouchableOpacity
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: isDark ? "#4a4a4a" : COLORS.WHITE,
+                borderBottomColor: isDark ? "#5a5a5a" : "#F5F5F5",
+              },
+            ]}
+            onPress={() => navigation.navigate("Settings")}
+          >
+            <View
+              style={[
+                styles.menuIcon,
+                { backgroundColor: isDark ? "#5a5a5a" : "#F3E5F5" },
+              ]}
+            >
+              <Ionicons name="settings" size={20} color={"#8E24AA"} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Settings</Text>
-              <Text style={styles.menuSubtitle}>Language, theme...</Text>
+              <Text
+                style={[
+                  styles.menuTitle,
+                  { color: isDark ? COLORS.WHITE : COLORS.DARK },
+                ]}
+              >
+                Settings
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubtitle,
+                  { color: isDark ? "#999" : COLORS.GRAY },
+                ]}
+              >
+                Language, theme...
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.menuItem} onPress={() => navigation.navigate("TermsPrivacy")}>
-            <View style={[styles.menuIcon, {backgroundColor: "#E3F2FD"}]}>
-              <Ionicons name="document-text" size={20} color="#1976D2" />
+          <TouchableOpacity
+            style={[
+              styles.menuItem,
+              {
+                backgroundColor: isDark ? "#4a4a4a" : COLORS.WHITE,
+                borderBottomColor: isDark ? "#5a5a5a" : "transparent",
+              },
+            ]}
+            onPress={() => navigation.navigate("TermsPrivacy")}
+          >
+            <View
+              style={[
+                styles.menuIcon,
+                { backgroundColor: isDark ? "#5a5a5a" : "#E3F2FD" },
+              ]}
+            >
+              <Ionicons name="document-text" size={20} color={"#1976D2"} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>Terms & Privacy</Text>
-              <Text style={styles.menuSubtitle}>Terms of use & Privacy policy</Text>
+              <Text
+                style={[
+                  styles.menuTitle,
+                  { color: isDark ? COLORS.WHITE : COLORS.DARK },
+                ]}
+              >
+                Terms & Privacy
+              </Text>
+              <Text
+                style={[
+                  styles.menuSubtitle,
+                  { color: isDark ? "#999" : COLORS.GRAY },
+                ]}
+              >
+                Terms of use & Privacy policy
+              </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
           </TouchableOpacity>
@@ -224,26 +469,76 @@ const ProfileScreen = ({navigation}: any) => {
 
   const renderActivityTab = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Recent Activity</Text>
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: isDark ? colors.TEXT_SECONDARY : "#8f8989" },
+        ]}
+      >
+        Recent Activity
+      </Text>
       {activityLoading ? (
-        <ActivityIndicator color={COLORS.PRIMARY} style={{marginTop: 20}} />
+        <ActivityIndicator color={COLORS.PRIMARY} style={{ marginTop: 20 }} />
       ) : (
         <View style={styles.timeline}>
           {activities.map((item, index) => (
             <View key={index} style={styles.timelineItem}>
               <View style={styles.timelineLeft}>
-                <View style={[styles.dot, {backgroundColor: getDotColor(item.type)}]} />
-                {index !== activities.length - 1 && <View style={styles.connector} />}
+                <View
+                  style={[
+                    styles.dot,
+                    { backgroundColor: getDotColor(item.type) },
+                  ]}
+                />
+                {index !== activities.length - 1 && (
+                  <View
+                    style={[
+                      styles.connector,
+                      { backgroundColor: colors.BORDER },
+                    ]}
+                  />
+                )}
               </View>
-              <View style={styles.timelineContent}>
-                <Text style={styles.timelineTitle}>{item.title}</Text>
-                <Text style={styles.timelineDesc}>{item.description}</Text>
-                <Text style={styles.timelineTime}>{new Date(item.createdAt).toLocaleDateString()}</Text>
+              <View
+                style={[
+                  styles.timelineContent,
+                  { backgroundColor: colors.CARD_BG },
+                ]}
+              >
+                <Text
+                  style={[styles.timelineTitle, { color: colors.TEXT_PRIMARY }]}
+                >
+                  {item.title}
+                </Text>
+                <Text
+                  style={[
+                    styles.timelineDesc,
+                    { color: colors.TEXT_SECONDARY },
+                  ]}
+                >
+                  {item.description}
+                </Text>
+                <Text
+                  style={[
+                    styles.timelineTime,
+                    { color: colors.TEXT_SECONDARY },
+                  ]}
+                >
+                  {new Date(item.createdAt).toLocaleDateString()}
+                </Text>
               </View>
             </View>
           ))}
           {activities.length === 0 && (
-            <Text style={{textAlign: "center", color: COLORS.GRAY, marginTop: 20}}>No activity yet.</Text>
+            <Text
+              style={{
+                textAlign: "center",
+                color: colors.TEXT_SECONDARY,
+                marginTop: 20,
+              }}
+            >
+              No activity yet.
+            </Text>
           )}
         </View>
       )}
@@ -265,23 +560,38 @@ const ProfileScreen = ({navigation}: any) => {
 
   const renderSecurityTab = () => (
     <View style={styles.section}>
-      <View style={styles.securityCard}>
+      <View style={[styles.securityCard, { backgroundColor: colors.CARD_BG }]}>
         <View style={styles.securityHeader}>
           <Ionicons name="shield-checkmark" size={32} color={COLORS.PRIMARY} />
-          <View style={{flex: 1, marginLeft: 12}}>
-            <Text style={styles.securityTitle}>Account Protected</Text>
-            <Text style={styles.securityDesc}>Your password is strong and secure.</Text>
+          <View style={{ flex: 1, marginLeft: 12 }}>
+            <Text
+              style={[styles.securityTitle, { color: colors.TEXT_PRIMARY }]}
+            >
+              Account Protected
+            </Text>
+            <Text
+              style={[styles.securityDesc, { color: colors.TEXT_SECONDARY }]}
+            >
+              Your password is strong and secure.
+            </Text>
           </View>
         </View>
 
-        <TouchableOpacity style={styles.changePassBtn} onPress={() => navigation.navigate("ChangePassword")}>
+        <TouchableOpacity
+          style={styles.changePassBtn}
+          onPress={() => navigation.navigate("ChangePassword")}
+        >
           <Text style={styles.changePassText}>Change Password</Text>
         </TouchableOpacity>
 
-        <View style={styles.loginHistory}>
-          <Text style={styles.historyTitle}>Last Login:</Text>
-          <Text style={styles.historyValue}>
-            {user?.updatedAt ? new Date(user.updatedAt).toLocaleString() : "Just now"}
+        <View style={[styles.loginHistory, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.historyTitle, { color: colors.TEXT_SECONDARY }]}>
+            Last Login:
+          </Text>
+          <Text style={[styles.historyValue, { color: colors.TEXT_PRIMARY }]}>
+            {user?.updatedAt
+              ? new Date(user.updatedAt).toLocaleString()
+              : "Just now"}
           </Text>
         </View>
       </View>
@@ -290,10 +600,14 @@ const ProfileScreen = ({navigation}: any) => {
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView
+        style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
+      >
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
-          <Text style={styles.loadingText}>Loading profile...</Text>
+          <ActivityIndicator size="large" color={colors.PRIMARY} />
+          <Text style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}>
+            Loading profile...
+          </Text>
         </View>
       </SafeAreaView>
     );
@@ -306,38 +620,54 @@ const ProfileScreen = ({navigation}: any) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={handleRefresh}
-          colors={[COLORS.WHITE]}
-          tintColor={COLORS.WHITE}
+          colors={[colors.PRIMARY]}
+          tintColor={colors.PRIMARY}
         />
       }
-      contentContainerStyle={{backgroundColor: "#F8F9FA", minHeight: "100%"}}
+      contentContainerStyle={{
+        backgroundColor: colors.BACKGROUND,
+        minHeight: "100%",
+      }}
     >
       <LinearGradient
         colors={[COLORS.PRIMARY, COLORS.PRIMARY]}
-        style={[styles.headerGradient, {paddingTop: insets.top + 5}]}
+        style={[styles.headerGradient, { paddingTop: insets.top + 5 }]}
       >
         <View style={styles.header}>
           <View style={styles.avatarSection}>
             <View style={styles.avatarContainer}>
               {user?.avatar ? (
-                <Image source={{uri: getImageUrl(user.avatar)}} style={styles.avatar} />
+                <Image
+                  source={{ uri: getImageUrl(user.avatar) }}
+                  style={styles.avatar}
+                />
               ) : (
                 <View style={styles.avatarPlaceholder}>
-                  <Text style={styles.avatarText}>{user?.fullName?.charAt(0).toUpperCase() || "U"}</Text>
+                  <Text style={styles.avatarText}>
+                    {(user?.name || user?.fullName)?.charAt(0).toUpperCase() ||
+                      "U"}
+                  </Text>
                 </View>
               )}
-              <TouchableOpacity style={styles.editAvatarButton} onPress={() => navigation.navigate("EditProfile")}>
+              <TouchableOpacity
+                style={styles.editAvatarButton}
+                onPress={() => navigation.navigate("EditProfile")}
+              >
                 <Ionicons name="camera" size={12} color={COLORS.PRIMARY} />
               </TouchableOpacity>
             </View>
 
             <View style={styles.userInfoContainer}>
               <Text style={styles.userName} numberOfLines={1}>
-                {user?.fullName ? user.fullName : user?.email}
+                {user?.name || user?.fullName || "Unnamed User"}
               </Text>
 
               <View style={styles.roleBadge}>
-                <Ionicons name="shield-checkmark" size={10} color={COLORS.PRIMARY} />
+                <Ionicons
+                  name="shield-checkmark"
+                  size={10}
+                  color={COLORS.PRIMARY}
+                />
                 <Text style={styles.roleText}>{user?.role?.toUpperCase()}</Text>
               </View>
 
@@ -358,7 +688,11 @@ const ProfileScreen = ({navigation}: any) => {
       </View>
 
       <View style={styles.logoutSection}>
-        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout} activeOpacity={0.7}>
+        <TouchableOpacity
+          style={styles.logoutButton}
+          onPress={handleLogout}
+          activeOpacity={0.7}
+        >
           <Ionicons name="log-out-outline" size={22} color={COLORS.WHITE} />
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
@@ -422,7 +756,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     paddingHorizontal: 24, // Optimized spacing
   },
-  avatarContainer: {position: "relative"},
+  avatarContainer: { position: "relative" },
   avatar: {
     width: 80,
     height: 80,
@@ -445,7 +779,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: COLORS.PRIMARY,
   },
-  userInfoContainer: {justifyContent: "center", flex: 1},
+  userInfoContainer: { justifyContent: "center", flex: 1 },
   editAvatarButton: {
     position: "absolute",
     bottom: 0,
@@ -503,7 +837,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     marginBottom: 20,
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
@@ -539,12 +873,11 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    backgroundColor: COLORS.WHITE,
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
     shadowColor: "#000",
-    shadowOffset: {width: 0, height: 2},
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 4,
     elevation: 2,
@@ -560,12 +893,10 @@ const styles = StyleSheet.create({
   statsCardValue: {
     fontSize: 20,
     fontWeight: "bold",
-    color: COLORS.DARK,
     marginBottom: 2,
   },
   statsCardLabel: {
     fontSize: 12,
-    color: COLORS.GRAY,
   },
   section: {
     marginBottom: 24,
@@ -573,7 +904,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 16,
     fontWeight: "700",
-    color: COLORS.DARK,
+    color: "#8f8989",
     marginBottom: 12,
   },
   menuContainer: {
@@ -596,26 +927,48 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
-  menuContent: {flex: 1},
-  menuTitle: {fontSize: 15, fontWeight: "600", color: COLORS.DARK, marginBottom: 2},
-  menuSubtitle: {fontSize: 12, color: COLORS.GRAY},
+  menuContent: { flex: 1 },
+  menuTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: COLORS.DARK,
+    marginBottom: 2,
+  },
+  menuSubtitle: { fontSize: 12, color: COLORS.GRAY },
 
   // Timeline Styles
-  timeline: {paddingLeft: 10},
-  timelineItem: {flexDirection: "row", paddingBottom: 24},
-  timelineLeft: {alignItems: "center", marginRight: 16, width: 20},
-  dot: {width: 12, height: 12, borderRadius: 6, zIndex: 1},
-  connector: {width: 2, backgroundColor: "#E0E0E0", flex: 1, marginTop: -4, marginBottom: -4},
-  timelineContent: {flex: 1, backgroundColor: COLORS.WHITE, padding: 12, borderRadius: 8},
-  timelineTitle: {fontSize: 14, fontWeight: "700", color: COLORS.DARK, marginBottom: 4},
-  timelineDesc: {fontSize: 13, color: COLORS.GRAY, marginBottom: 8},
-  timelineTime: {fontSize: 11, color: "#999"},
+  timeline: { paddingLeft: 10 },
+  timelineItem: { flexDirection: "row", paddingBottom: 24 },
+  timelineLeft: { alignItems: "center", marginRight: 16, width: 20 },
+  dot: { width: 12, height: 12, borderRadius: 6, zIndex: 1 },
+  connector: {
+    width: 2,
+    flex: 1,
+    marginTop: -4,
+    marginBottom: -4,
+  },
+  timelineContent: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 8,
+  },
+  timelineTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  timelineDesc: { fontSize: 13, marginBottom: 8 },
+  timelineTime: { fontSize: 11 },
 
   // Security Styles
-  securityCard: {backgroundColor: COLORS.WHITE, borderRadius: 12, padding: 20, marginBottom: 16},
-  securityHeader: {flexDirection: "row", marginBottom: 20},
-  securityTitle: {fontSize: 16, fontWeight: "bold"},
-  securityDesc: {fontSize: 13, color: COLORS.GRAY, marginTop: 4},
+  securityCard: {
+    borderRadius: 12,
+    padding: 20,
+    marginBottom: 16,
+  },
+  securityHeader: { flexDirection: "row", marginBottom: 20 },
+  securityTitle: { fontSize: 16, fontWeight: "bold" },
+  securityDesc: { fontSize: 13, marginTop: 4 },
   changePassBtn: {
     backgroundColor: COLORS.PRIMARY,
     borderRadius: 8,
@@ -623,19 +976,27 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 20,
   },
-  changePassText: {color: COLORS.WHITE, fontWeight: "600"},
-  loginHistory: {borderTopWidth: 1, borderTopColor: "#F0F0F0", paddingTop: 16},
-  historyTitle: {fontSize: 12, color: COLORS.GRAY},
-  historyValue: {fontSize: 14, fontWeight: "500", marginTop: 4},
+  changePassText: { color: COLORS.WHITE, fontWeight: "600" },
+  loginHistory: {
+    borderTopWidth: 1,
+    paddingTop: 16,
+  },
+  historyTitle: { fontSize: 12 },
+  historyValue: { fontSize: 14, fontWeight: "500", marginTop: 4 },
 
   bioContainer: {
     backgroundColor: COLORS.WHITE,
     padding: 16,
     borderRadius: 12,
   },
-  bioText: {fontSize: 14, color: COLORS.DARK_GRAY, fontStyle: "italic", lineHeight: 22},
+  bioText: {
+    fontSize: 14,
+    color: COLORS.DARK_GRAY,
+    fontStyle: "italic",
+    lineHeight: 22,
+  },
 
-  logoutSection: {paddingHorizontal: 16, marginTop: 8},
+  logoutSection: { paddingHorizontal: 16, marginTop: 8 },
   logoutButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -645,10 +1006,10 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.PRIMARY,
     gap: 8,
   },
-  logoutText: {fontSize: 15, fontWeight: "600", color: COLORS.WHITE},
-  versionSection: {alignItems: "center", paddingVertical: 16},
-  versionText: {fontSize: 12, color: COLORS.GRAY},
-  bottomPadding: {height: 20},
+  logoutText: { fontSize: 15, fontWeight: "600", color: COLORS.WHITE },
+  versionSection: { alignItems: "center", paddingVertical: 16 },
+  versionText: { fontSize: 12, color: COLORS.GRAY },
+  bottomPadding: { height: 20 },
 });
 
 export default ProfileScreen;

@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { View, ScrollView, StyleSheet, Text, Switch, TouchableOpacity, Alert } from "react-native";
+import {
+  View,
+  ScrollView,
+  StyleSheet,
+  Text,
+  Switch,
+  TouchableOpacity,
+  Alert,
+} from "react-native";
 import SafeAreaView from "@/src/components/common/SafeAreaView";
 import { Ionicons } from "@expo/vector-icons";
 import Button from "@/src/components/common/Button";
 import { COLORS } from "@/src/styles/colors";
+import { useTheme } from "@/src/hooks/useTheme";
 
 const NotificationSettingsScreen = ({ navigation }: any) => {
+  const { colors, isDark } = useTheme();
   const [settings, setSettings] = useState({
     pushNotifications: true,
     orderUpdates: true,
@@ -83,31 +93,74 @@ const NotificationSettingsScreen = ({ navigation }: any) => {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
+    >
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <Text style={styles.headerTitle}>Manage how you receive notifications</Text>
+        <View style={[styles.header, { backgroundColor: colors.CARD_BG }]}>
+          <Text style={[styles.headerTitle, { color: colors.TEXT_PRIMARY }]}>
+            Manage how you receive notifications
+          </Text>
         </View>
 
         {settingsGroups.map((group, groupIndex) => (
-          <View key={groupIndex} style={styles.section}>
-            <Text style={styles.sectionTitle}>{group.title}</Text>
+          <View
+            key={groupIndex}
+            style={[styles.section, { backgroundColor: colors.CARD_BG }]}
+          >
+            <Text
+              style={[styles.sectionTitle, { color: colors.TEXT_SECONDARY }]}
+            >
+              {group.title}
+            </Text>
 
             {group.items.map((item, index) => (
-              <View key={item.key} style={styles.settingItem}>
-                <View style={styles.settingIcon}>
-                  <Ionicons name={item.icon as any} size={22} color={COLORS.PRIMARY} />
+              <View
+                key={item.key}
+                style={[
+                  styles.settingItem,
+                  { borderBottomColor: colors.BORDER },
+                ]}
+              >
+                <View
+                  style={[
+                    styles.settingIcon,
+                    { backgroundColor: isDark ? "#3A3A3A" : "#FFE5E5" },
+                  ]}
+                >
+                  <Ionicons
+                    name={item.icon as any}
+                    size={22}
+                    color={colors.PRIMARY}
+                  />
                 </View>
 
                 <View style={styles.settingContent}>
-                  <Text style={styles.settingLabel}>{item.label}</Text>
-                  <Text style={styles.settingSubtitle}>{item.subtitle}</Text>
+                  <Text
+                    style={[
+                      styles.settingLabel,
+                      { color: colors.TEXT_PRIMARY },
+                    ]}
+                  >
+                    {item.label}
+                  </Text>
+                  <Text
+                    style={[
+                      styles.settingSubtitle,
+                      { color: colors.TEXT_SECONDARY },
+                    ]}
+                  >
+                    {item.subtitle}
+                  </Text>
                 </View>
 
                 <Switch
                   value={settings[item.key]}
                   onValueChange={() => handleToggle(item.key)}
-                  trackColor={{ false: "#E5E7EB", true: COLORS.PRIMARY }}
+                  trackColor={{
+                    false: isDark ? "#555" : "#E5E7EB",
+                    true: colors.PRIMARY,
+                  }}
                   thumbColor={COLORS.WHITE}
                 />
               </View>
@@ -115,15 +168,30 @@ const NotificationSettingsScreen = ({ navigation }: any) => {
           </View>
         ))}
 
-        <View style={styles.noteContainer}>
-          <Ionicons name="information-circle-outline" size={20} color={COLORS.INFO} />
-          <Text style={styles.noteText}>
-            You can change these settings anytime. Some notifications may be required for order updates.
+        <View
+          style={[
+            styles.noteContainer,
+            { backgroundColor: isDark ? "#1E2A36" : "#E3F2FD" },
+          ]}
+        >
+          <Ionicons
+            name="information-circle-outline"
+            size={20}
+            color={colors.INFO}
+          />
+          <Text style={[styles.noteText, { color: colors.INFO }]}>
+            You can change these settings anytime. Some notifications may be
+            required for order updates.
           </Text>
         </View>
 
         <View style={styles.buttonContainer}>
-          <Button title="Save Preferences" onPress={handleSave} loading={loading} containerStyle={styles.button} />
+          <Button
+            title="Save Preferences"
+            onPress={handleSave}
+            loading={loading}
+            containerStyle={styles.button}
+          />
         </View>
       </ScrollView>
     </SafeAreaView>
