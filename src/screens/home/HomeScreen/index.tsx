@@ -71,7 +71,7 @@ const HomeScreen = ({ navigation }: any) => {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={[styles.mainCard, { backgroundColor: colors.PRIMARY }]}>
-          <Text style={[styles.cardTitle, { color: colors.DARK }]}>
+          <Text style={[styles.cardTitle, { color: COLORS.WHITE }]}>
             Base App Project
           </Text>
           <Text

@@ -5,7 +5,7 @@ export const LightTheme = {
   ...BASE_COLORS,
   BACKGROUND: "#F8F9FA", // Màu nền sáng
   CARD_BG: "#FFFFFF", // Màu nền thẻ sáng
-  TEXT_PRIMARY: "#1F2937",
+  TEXT_PRIMARY: "#1E1E1E",
   TEXT_SECONDARY: "#9CA3AF",
   BORDER: "#E5E7EB",
   ICON_BG: "#F3F4F6",

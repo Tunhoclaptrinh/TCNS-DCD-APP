@@ -229,29 +229,52 @@ const ProfileScreen = ({ navigation }: any) => {
       {stats && (
         <View style={styles.statsGridSection}>
           <TouchableOpacity
-            style={styles.statsCard}
+            style={[styles.statsCard, { backgroundColor: colors.CARD_BG }]}
             onPress={() => navigation.navigate("FavoritesList")}
             activeOpacity={0.7}
           >
             <View
-              style={[styles.statsCardIcon, { backgroundColor: "#FFF0F5" }]}
+              style={[
+                styles.statsCardIcon,
+                { backgroundColor: isDark ? "#4a2a3a" : "#FFF0F5" },
+              ]}
             >
               <Ionicons name="heart" size={24} color="#E91E63" />
             </View>
-            <Text style={styles.statsCardValue}>{stats.totalFavorites}</Text>
-            <Text style={styles.statsCardLabel}>Favorites</Text>
+            <Text
+              style={[styles.statsCardValue, { color: colors.TEXT_PRIMARY }]}
+            >
+              {stats.totalFavorites}
+            </Text>
+            <Text
+              style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
+            >
+              Favorites
+            </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.statsCard} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={[styles.statsCard, { backgroundColor: colors.CARD_BG }]}
+            activeOpacity={0.7}
+          >
             <View
-              style={[styles.statsCardIcon, { backgroundColor: "#E6F7FF" }]}
+              style={[
+                styles.statsCardIcon,
+                { backgroundColor: isDark ? "#2a3a4a" : "#E6F7FF" },
+              ]}
             >
               <Ionicons name="grid" size={24} color="#1890ff" />
             </View>
-            <Text style={styles.statsCardValue}>
+            <Text
+              style={[styles.statsCardValue, { color: colors.TEXT_PRIMARY }]}
+            >
               {stats.totalCollections || 0}
             </Text>
-            <Text style={styles.statsCardLabel}>Collections</Text>
+            <Text
+              style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
+            >
+              Collections
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -446,7 +469,14 @@ const ProfileScreen = ({ navigation }: any) => {
 
   const renderActivityTab = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Recent Activity</Text>
+      <Text
+        style={[
+          styles.sectionTitle,
+          { color: isDark ? colors.TEXT_SECONDARY : "#8f8989" },
+        ]}
+      >
+        Recent Activity
+      </Text>
       {activityLoading ? (
         <ActivityIndicator color={COLORS.PRIMARY} style={{ marginTop: 20 }} />
       ) : (
@@ -461,13 +491,39 @@ const ProfileScreen = ({ navigation }: any) => {
                   ]}
                 />
                 {index !== activities.length - 1 && (
-                  <View style={styles.connector} />
+                  <View
+                    style={[
+                      styles.connector,
+                      { backgroundColor: colors.BORDER },
+                    ]}
+                  />
                 )}
               </View>
-              <View style={styles.timelineContent}>
-                <Text style={styles.timelineTitle}>{item.title}</Text>
-                <Text style={styles.timelineDesc}>{item.description}</Text>
-                <Text style={styles.timelineTime}>
+              <View
+                style={[
+                  styles.timelineContent,
+                  { backgroundColor: colors.CARD_BG },
+                ]}
+              >
+                <Text
+                  style={[styles.timelineTitle, { color: colors.TEXT_PRIMARY }]}
+                >
+                  {item.title}
+                </Text>
+                <Text
+                  style={[
+                    styles.timelineDesc,
+                    { color: colors.TEXT_SECONDARY },
+                  ]}
+                >
+                  {item.description}
+                </Text>
+                <Text
+                  style={[
+                    styles.timelineTime,
+                    { color: colors.TEXT_SECONDARY },
+                  ]}
+                >
                   {new Date(item.createdAt).toLocaleDateString()}
                 </Text>
               </View>
@@ -475,7 +531,11 @@ const ProfileScreen = ({ navigation }: any) => {
           ))}
           {activities.length === 0 && (
             <Text
-              style={{ textAlign: "center", color: COLORS.GRAY, marginTop: 20 }}
+              style={{
+                textAlign: "center",
+                color: colors.TEXT_SECONDARY,
+                marginTop: 20,
+              }}
             >
               No activity yet.
             </Text>
@@ -500,12 +560,18 @@ const ProfileScreen = ({ navigation }: any) => {
 
   const renderSecurityTab = () => (
     <View style={styles.section}>
-      <View style={styles.securityCard}>
+      <View style={[styles.securityCard, { backgroundColor: colors.CARD_BG }]}>
         <View style={styles.securityHeader}>
           <Ionicons name="shield-checkmark" size={32} color={COLORS.PRIMARY} />
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.securityTitle}>Account Protected</Text>
-            <Text style={styles.securityDesc}>
+            <Text
+              style={[styles.securityTitle, { color: colors.TEXT_PRIMARY }]}
+            >
+              Account Protected
+            </Text>
+            <Text
+              style={[styles.securityDesc, { color: colors.TEXT_SECONDARY }]}
+            >
               Your password is strong and secure.
             </Text>
           </View>
@@ -518,9 +584,11 @@ const ProfileScreen = ({ navigation }: any) => {
           <Text style={styles.changePassText}>Change Password</Text>
         </TouchableOpacity>
 
-        <View style={styles.loginHistory}>
-          <Text style={styles.historyTitle}>Last Login:</Text>
-          <Text style={styles.historyValue}>
+        <View style={[styles.loginHistory, { borderTopColor: colors.BORDER }]}>
+          <Text style={[styles.historyTitle, { color: colors.TEXT_SECONDARY }]}>
+            Last Login:
+          </Text>
+          <Text style={[styles.historyValue, { color: colors.TEXT_PRIMARY }]}>
             {user?.updatedAt
               ? new Date(user.updatedAt).toLocaleString()
               : "Just now"}
@@ -805,7 +873,6 @@ const styles = StyleSheet.create({
   },
   statsCard: {
     flex: 1,
-    backgroundColor: COLORS.WHITE,
     padding: 16,
     borderRadius: 12,
     alignItems: "center",
@@ -826,12 +893,10 @@ const styles = StyleSheet.create({
   statsCardValue: {
     fontSize: 20,
     fontWeight: "bold",
-    color: COLORS.DARK,
     marginBottom: 2,
   },
   statsCardLabel: {
     fontSize: 12,
-    color: COLORS.GRAY,
   },
   section: {
     marginBottom: 24,
@@ -878,36 +943,32 @@ const styles = StyleSheet.create({
   dot: { width: 12, height: 12, borderRadius: 6, zIndex: 1 },
   connector: {
     width: 2,
-    backgroundColor: "#E0E0E0",
     flex: 1,
     marginTop: -4,
     marginBottom: -4,
   },
   timelineContent: {
     flex: 1,
-    backgroundColor: COLORS.WHITE,
     padding: 12,
     borderRadius: 8,
   },
   timelineTitle: {
     fontSize: 14,
     fontWeight: "700",
-    color: COLORS.DARK,
     marginBottom: 4,
   },
-  timelineDesc: { fontSize: 13, color: COLORS.GRAY, marginBottom: 8 },
-  timelineTime: { fontSize: 11, color: "#999" },
+  timelineDesc: { fontSize: 13, marginBottom: 8 },
+  timelineTime: { fontSize: 11 },
 
   // Security Styles
   securityCard: {
-    backgroundColor: COLORS.WHITE,
     borderRadius: 12,
     padding: 20,
     marginBottom: 16,
   },
   securityHeader: { flexDirection: "row", marginBottom: 20 },
   securityTitle: { fontSize: 16, fontWeight: "bold" },
-  securityDesc: { fontSize: 13, color: COLORS.GRAY, marginTop: 4 },
+  securityDesc: { fontSize: 13, marginTop: 4 },
   changePassBtn: {
     backgroundColor: COLORS.PRIMARY,
     borderRadius: 8,
@@ -918,10 +979,9 @@ const styles = StyleSheet.create({
   changePassText: { color: COLORS.WHITE, fontWeight: "600" },
   loginHistory: {
     borderTopWidth: 1,
-    borderTopColor: "#F0F0F0",
     paddingTop: 16,
   },
-  historyTitle: { fontSize: 12, color: COLORS.GRAY },
+  historyTitle: { fontSize: 12 },
   historyValue: { fontSize: 14, fontWeight: "500", marginTop: 4 },
 
   bioContainer: {
