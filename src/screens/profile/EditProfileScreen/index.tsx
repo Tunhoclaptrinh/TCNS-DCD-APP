@@ -23,11 +23,13 @@ import Button from "@/src/components/common/Button";
 import { COLORS } from "@/src/styles/colors";
 import styles from "./styles";
 import { getImageUrl } from "@/src/utils/formatters";
+import { useTranslation } from "@/src/utils/i18n";
 
 const EditProfileScreen = ({ navigation }: any) => {
   const dispatch = useDispatch<any>();
   const { user, token } = useSelector((state: RootState) => state.auth);
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -41,9 +43,9 @@ const EditProfileScreen = ({ navigation }: any) => {
 
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
-    if (!formData.name.trim()) newErrors.name = "Tên là bắt buộc";
+    if (!formData.name.trim()) newErrors.name = t("profile.nameRequired");
     if (formData.phone && !/^[0-9]{10,11}$/.test(formData.phone)) {
-      newErrors.phone = "Số điện thoại không hợp lệ";
+      newErrors.phone = t("profile.invalidPhone");
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -73,10 +75,10 @@ const EditProfileScreen = ({ navigation }: any) => {
   };
 
   const handleAvatarPress = () => {
-    Alert.alert("Thay đổi ảnh đại diện", "Chọn một tùy chọn", [
-      { text: "Chụp ảnh", onPress: handleTakePhoto },
-      { text: "Chọn từ thư viện", onPress: handlePickImage },
-      { text: "Hủy", style: "cancel" },
+    Alert.alert(t("profile.changeAvatar"), t("profile.chooseOption"), [
+      { text: t("profile.takePhoto"), onPress: handleTakePhoto },
+      { text: t("profile.chooseFromLibrary"), onPress: handlePickImage },
+      { text: t("common.cancel"), style: "cancel" },
     ]);
   };
 
@@ -145,12 +147,15 @@ const EditProfileScreen = ({ navigation }: any) => {
         await dispatch(updateUser(updatedUser as any));
       }
 
-      Alert.alert("Thành công", "Cập nhật hồ sơ thành công", [
-        { text: "OK", onPress: () => navigation.goBack() },
+      Alert.alert(t("common.success"), t("profile.saveProfileSuccess"), [
+        { text: t("common.ok"), onPress: () => navigation.goBack() },
       ]);
     } catch (error: any) {
       console.error("Error updating profile:", error);
-      Alert.alert("Lỗi", error.message || "Không thể cập nhật hồ sơ");
+      Alert.alert(
+        t("common.error"),
+        error.message || t("profile.saveProfileFailed"),
+      );
     } finally {
       setLoading(false);
     }
@@ -202,7 +207,7 @@ const EditProfileScreen = ({ navigation }: any) => {
               { color: isDark ? colors.TEXT_SECONDARY : COLORS.GRAY },
             ]}
           >
-            Nhấn để đổi ảnh đại diện
+            {t("profile.tapToChangeAvatar")}
           </Text>
         </View>
 
@@ -220,7 +225,7 @@ const EditProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? colors.TEXT_PRIMARY : COLORS.DARK },
                 ]}
               >
-                Email
+                {t("auth.email")}
               </Text>
             </View>
             <View
@@ -241,7 +246,9 @@ const EditProfileScreen = ({ navigation }: any) => {
                 {user?.email}
               </Text>
               <View style={styles.readonlyBadge}>
-                <Text style={styles.readonlyBadgeText}>Đã xác thực</Text>
+                <Text style={styles.readonlyBadgeText}>
+                  {t("profile.verified")}
+                </Text>
               </View>
             </View>
           </View>
@@ -259,13 +266,13 @@ const EditProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? colors.TEXT_PRIMARY : COLORS.DARK },
                 ]}
               >
-                Họ và tên *
+                {t("auth.fullName")} *
               </Text>
             </View>
             <Input
               value={formData.name}
               onChangeText={(name) => setFormData({ ...formData, name })}
-              placeholder="Nhập tên của bạn"
+              placeholder={t("auth.fullName")}
               error={errors.name}
               containerStyle={styles.input}
             />
@@ -284,13 +291,13 @@ const EditProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? colors.TEXT_PRIMARY : COLORS.DARK },
                 ]}
               >
-                Số điện thoại
+                {t("auth.phone")}
               </Text>
             </View>
             <Input
               value={formData.phone}
               onChangeText={(phone) => setFormData({ ...formData, phone })}
-              placeholder="Nhập số điện thoại"
+              placeholder={t("auth.phone")}
               error={errors.phone}
               containerStyle={styles.input}
               keyboardType="phone-pad"
@@ -310,7 +317,7 @@ const EditProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? colors.TEXT_PRIMARY : COLORS.DARK },
                 ]}
               >
-                Giới thiệu
+                {t("profile.bio")}
               </Text>
             </View>
             <TextInput
@@ -328,7 +335,7 @@ const EditProfileScreen = ({ navigation }: any) => {
               ]}
               value={formData.bio}
               onChangeText={(bio) => setFormData({ ...formData, bio })}
-              placeholder="Giới thiệu ngắn gọn về bạn..."
+              placeholder={t("profile.bioPlaceholder")}
               placeholderTextColor={
                 isDark ? colors.TEXT_SECONDARY : COLORS.GRAY
               }
@@ -349,13 +356,13 @@ const EditProfileScreen = ({ navigation }: any) => {
         ]}
       >
         <Button
-          title="Hủy"
+          title={t("common.cancel")}
           onPress={() => navigation.goBack()}
           variant="outline"
           containerStyle={styles.actionButton}
         />
         <Button
-          title={loading ? "Đang lưu..." : "Lưu thay đổi"}
+          title={loading ? t("profile.saving") : t("profile.save")}
           onPress={handleSave}
           loading={loading}
           disabled={loading || !hasChanges()}

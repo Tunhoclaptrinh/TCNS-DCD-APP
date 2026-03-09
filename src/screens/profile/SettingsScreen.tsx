@@ -1,13 +1,20 @@
 // src/screens/profile/SettingsScreen.tsx
 import React from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch, Alert } from "react-native";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/src/store";
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Switch,
+  Alert,
+} from "react-native";
+import { useAppDispatch, useAppSelector } from "@/src/store";
 import {
   setTheme,
   setLanguage,
   toggleNotifications,
-  toggleBiometrics
+  toggleBiometrics,
 } from "@/src/store/slices/settingsSlice";
 import { logout } from "@/src/store/slices/authSlice";
 
@@ -16,21 +23,33 @@ import { Ionicons } from "@expo/vector-icons";
 import * as LocalAuthentication from "expo-local-authentication"; // Import thư viện
 import { useTheme } from "@/src/hooks/useTheme"; // Import theme hook
 import { useTranslation } from "@/src/utils/i18n"; // Import i18n hook
+import { BiometricService } from "@/src/utils/biometric"; // Import BiometricService
+import { StorageService } from "@/src/utils/storage"; // Import StorageService
 
 const SettingsScreen = ({ navigation }: any) => {
-  const dispatch = useDispatch<any>();
+  const dispatch = useAppDispatch();
   // Sử dụng hook Theme và Translation - giả định các hook này vẫn hoạt động hoặc sẽ được fix sau nếu lỗi
   // Nếu useTheme/useTranslation phụ thuộc vào store cũ, chúng cũng cần được refactor.
   // Tuy nhiên, ưu tiên fix lỗi build do import sai trước.
   const { colors, isDark } = useTheme();
   const { t, locale } = useTranslation();
 
-  const { language, notificationsEnabled, biometricsEnabled } = useSelector((state: RootState) => state.settings);
-  // Theme hiện tại đang được lấy từ useTheme hook, có thể bị conflict với store. 
+  const { language, notificationsEnabled, biometricsEnabled } = useAppSelector(
+    (state) => state.settings,
+  );
+  // Theme hiện tại đang được lấy từ useTheme hook, có thể bị conflict với store.
   // Để an toàn, ta tạm thời tin tưởng useTheme điều khiển UI, và settings store lưu trạng thái.
 
   const handleLogout = () => {
     dispatch(logout());
+  };
+
+  const handleThemeToggle = (val: boolean) => {
+    dispatch(setTheme(val ? "dark" : "light"));
+  };
+
+  const handleNotificationsToggle = () => {
+    dispatch(toggleNotifications());
   };
 
   // Xử lý bật/tắt Sinh trắc học thực tế
@@ -38,47 +57,84 @@ const SettingsScreen = ({ navigation }: any) => {
     // Nếu đang bật -> tắt ngay
     if (biometricsEnabled) {
       dispatch(toggleBiometrics());
+      // Xóa credentials đã lưu
+      await StorageService.removeBiometricCredentials();
+      Alert.alert(t("common.success"), t("settings.biometricsDisabled"));
       return;
     }
 
     // Nếu đang tắt -> bật lên (cần kiểm tra phần cứng)
     try {
-      const hasHardware = await LocalAuthentication.hasHardwareAsync();
-      const isEnrolled = await LocalAuthentication.isEnrolledAsync();
+      const isAvailable = await BiometricService.isAvailable();
 
-      if (!hasHardware || !isEnrolled) {
-        Alert.alert(t("error"), t("biometricsError"));
+      if (!isAvailable) {
+        Alert.alert(t("common.error"), t("settings.biometricsError"));
         return;
       }
 
-      // Xác thực thử để kích hoạt
-      const result = await LocalAuthentication.authenticateAsync({
-        promptMessage: "Xác thực để kích hoạt",
-        fallbackLabel: "Sử dụng mật khẩu",
-      });
+      // Kiểm tra xem đã có credentials được lưu chưa
+      const savedCredentials = await StorageService.getBiometricCredentials();
 
-      if (result.success) {
+      if (!savedCredentials) {
+        // BẬT sinh trắc học TRƯỚC rồi yêu cầu đăng nhập lại
         dispatch(toggleBiometrics());
-        Alert.alert(t("success"), "Đã kích hoạt đăng nhập sinh trắc học");
+
+        Alert.alert(
+          t("settings.biometricsRequireLogin"),
+          t("settings.biometricsRequireLoginMessage"),
+          [
+            {
+              text: t("common.cancel"),
+              style: "cancel",
+              onPress: () => {
+                // Nếu user hủy, tắt lại sinh trắc học
+                dispatch(toggleBiometrics());
+              },
+            },
+            {
+              text: t("common.confirm"),
+              onPress: () => {
+                // Đăng xuất để họ đăng nhập lại
+                dispatch(logout());
+              },
+            },
+          ],
+        );
+        return;
+      }
+
+      // Nếu đã có credentials, xác thực thử để kích hoạt
+      const biometricName = await BiometricService.getBiometricTypeName();
+      const isAuthenticated = await BiometricService.authenticate(
+        `Xác thực ${biometricName} để kích hoạt`,
+      );
+
+      if (isAuthenticated) {
+        dispatch(toggleBiometrics());
+        Alert.alert(t("common.success"), t("settings.biometricsEnabled"));
       }
     } catch (error) {
       console.error(error);
+      Alert.alert(t("common.error"), t("errors.unknownError"));
     }
   };
 
   const handleClearCache = () => {
-    Alert.alert(t("clearCache"), "Bạn có chắc chắn không?", [
-      { text: t("cancel"), style: "cancel" },
+    Alert.alert(t("settings.clearCache"), t("settings.clearCacheConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: t("confirm"),
-        onPress: () => Alert.alert(t("success"), t("cacheCleared")),
+        text: t("common.confirm"),
+        onPress: () =>
+          Alert.alert(t("common.success"), t("settings.cacheCleared")),
       },
     ]);
   };
 
   // Helper render section (có style động theo theme)
   const renderSectionHeader = (title: string) => (
-    <Text style={[styles.sectionHeader, { color: colors.TEXT_SECONDARY }]}>{title}</Text>
+    <Text style={[styles.sectionHeader, { color: colors.TEXT_SECONDARY }]}>
+      {title}
+    </Text>
   );
 
   // Helper render item (có style động theo theme)
@@ -87,10 +143,13 @@ const SettingsScreen = ({ navigation }: any) => {
     label: string,
     rightElement: React.ReactNode,
     onPress?: () => void,
-    iconColor: string = colors.PRIMARY
+    iconColor: string = colors.PRIMARY,
   ) => (
     <TouchableOpacity
-      style={[styles.itemContainer, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}
+      style={[
+        styles.itemContainer,
+        { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER },
+      ]}
       onPress={onPress}
       disabled={!onPress}
       activeOpacity={0.7}
@@ -99,60 +158,74 @@ const SettingsScreen = ({ navigation }: any) => {
         <View style={[styles.iconBox, { backgroundColor: iconColor + "15" }]}>
           <Ionicons name={icon as any} size={20} color={iconColor} />
         </View>
-        <Text style={[styles.itemLabel, { color: colors.TEXT_PRIMARY }]}>{label}</Text>
+        <Text style={[styles.itemLabel, { color: colors.TEXT_PRIMARY }]}>
+          {label}
+        </Text>
       </View>
       <View style={styles.itemRight}>{rightElement}</View>
     </TouchableOpacity>
   );
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+    <SafeAreaView
+      style={[styles.container, { backgroundColor: colors.BACKGROUND }]}
+    >
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.content}
+      >
         {/* --- Giao diện & Ngôn ngữ --- */}
-        {renderSectionHeader(t("general"))}
+        {renderSectionHeader(t("settings.general"))}
 
         {renderItem(
           "language-outline",
-          t("language"),
+          t("settings.language"),
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text style={[styles.valueText, { color: colors.TEXT_SECONDARY }]}>
               {locale === "vi" ? "Tiếng Việt" : "English"}
             </Text>
-            <Ionicons name="chevron-forward" size={20} color={colors.TEXT_SECONDARY} />
+            <Ionicons
+              name="chevron-forward"
+              size={20}
+              color={colors.TEXT_SECONDARY}
+            />
           </View>,
           () => {
-            Alert.alert(t("language"), "", [
-              { text: "Tiếng Việt", onPress: () => dispatch(setLanguage("vi")) },
+            Alert.alert(t("settings.language"), "", [
+              {
+                text: "Tiếng Việt",
+                onPress: () => dispatch(setLanguage("vi")),
+              },
               { text: "English", onPress: () => dispatch(setLanguage("en")) },
             ]);
           },
-          "#4CAF50"
+          "#4CAF50",
         )}
 
         {renderItem(
           isDark ? "moon" : "sunny",
-          t("theme"),
+          t("settings.theme"),
           <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
             <Text style={[styles.valueText, { color: colors.TEXT_SECONDARY }]}>
-              {isDark ? t("themeDark") : t("themeLight")}
+              {isDark ? t("settings.themeDark") : t("settings.themeLight")}
             </Text>
             <Switch
               value={isDark}
-              onValueChange={(val) => dispatch(setTheme(val ? "dark" : "light"))}
+              onValueChange={handleThemeToggle}
               trackColor={{ false: "#E5E7EB", true: colors.PRIMARY }}
               thumbColor="#FFFFFF"
             />
           </View>,
           undefined,
-          "#FF9800"
+          "#FF9800",
         )}
 
         {/* --- Bảo mật --- */}
-        {renderSectionHeader(t("security"))}
+        {renderSectionHeader(t("settings.security"))}
 
         {renderItem(
           "finger-print-outline",
-          t("biometrics"),
+          t("settings.biometrics"),
           <Switch
             value={biometricsEnabled}
             onValueChange={handleBiometricsToggle} // Sử dụng hàm xử lý thực tế
@@ -160,47 +233,55 @@ const SettingsScreen = ({ navigation }: any) => {
             thumbColor="#FFFFFF"
           />,
           undefined,
-          "#9C27B0"
+          "#9C27B0",
         )}
 
         {renderItem(
           "notifications-outline",
-          t("notifications"),
+          t("settings.notifications"),
           <Switch
             value={notificationsEnabled}
-            onValueChange={() => dispatch(toggleNotifications())}
+            onValueChange={handleNotificationsToggle}
             trackColor={{ false: "#E5E7EB", true: colors.PRIMARY }}
             thumbColor="#FFFFFF"
           />,
           undefined,
-          "#F44336"
+          "#F44336",
         )}
 
         {renderItem(
           "trash-bin-outline",
-          t("clearCache"),
-          <Ionicons name="chevron-forward" size={20} color={colors.TEXT_SECONDARY} />,
+          t("settings.clearCache"),
+          <Ionicons
+            name="chevron-forward"
+            size={20}
+            color={colors.TEXT_SECONDARY}
+          />,
           handleClearCache,
-          "#607D8B"
+          "#607D8B",
         )}
 
         {/* --- Thông tin --- */}
-        {renderSectionHeader(t("info"))}
+        {renderSectionHeader(t("settings.info"))}
 
         {renderItem(
           "information-circle-outline",
-          t("version"),
-          <Text style={[styles.valueText, { color: colors.TEXT_SECONDARY }]}>1.0.0</Text>,
+          t("settings.version"),
+          <Text style={[styles.valueText, { color: colors.TEXT_SECONDARY }]}>
+            1.0.0
+          </Text>,
           undefined,
-          colors.INFO
+          colors.INFO,
         )}
 
         {/* Logout */}
         <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-          <Text style={styles.logoutText}>{t("logout")}</Text>
+          <Text style={styles.logoutText}>{t("auth.logout")}</Text>
         </TouchableOpacity>
 
-        <Text style={[styles.footerText, { color: colors.TEXT_SECONDARY }]}>Base App © 2026</Text>
+        <Text style={[styles.footerText, { color: colors.TEXT_SECONDARY }]}>
+          Base App © 2026
+        </Text>
       </ScrollView>
     </SafeAreaView>
   );

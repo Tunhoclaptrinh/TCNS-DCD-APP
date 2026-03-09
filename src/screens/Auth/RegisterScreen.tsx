@@ -1,11 +1,20 @@
-import React, {useState} from "react";
-import {View, StyleSheet, ScrollView, TouchableOpacity, Text, Image} from "react-native";
-import {useAuth} from "@hooks/useAuth";
+import React, { useState } from "react";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+  Image,
+} from "react-native";
+import { useAuth } from "@hooks/useAuth";
 import Input from "@/src/components/common/Input/Input";
 import Button from "@/src/components/common/Button";
-import {COLORS} from "@/src/styles/colors";
+import { COLORS } from "@/src/styles/colors";
+import { useTranslation } from "@/src/utils/i18n";
 
-const RegisterScreen = ({navigation}: any) => {
+const RegisterScreen = ({ navigation }: any) => {
+  const { t } = useTranslation();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -14,7 +23,7 @@ const RegisterScreen = ({navigation}: any) => {
     confirmPassword: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const {register} = useAuth();
+  const { register } = useAuth();
   const [loading, setLoading] = useState(false);
 
   const handleRegister = async () => {
@@ -22,7 +31,9 @@ const RegisterScreen = ({navigation}: any) => {
     try {
       await register(formData as any);
     } catch (error: any) {
-      setErrors({general: error.response?.data?.message || "Registration failed"});
+      setErrors({
+        general: error.response?.data?.message || t("auth.registerFailed"),
+      });
     } finally {
       setLoading(false);
     }
@@ -31,54 +42,61 @@ const RegisterScreen = ({navigation}: any) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
       <View style={styles.headerContainer}>
-        <Text style={styles.title}>BASE APP</Text>
-        <Text style={styles.subtitle}>Create Account</Text>
+        <Text style={styles.title}>{t("auth.baseApp")}</Text>
+        <Text style={styles.subtitle}>{t("auth.createAccount")}</Text>
       </View>
 
       <Input
-        label="Full Name"
+        label={t("auth.fullName")}
         value={formData.name}
-        onChangeText={(name) => setFormData({...formData, name})}
+        onChangeText={(name) => setFormData({ ...formData, name })}
         error={errors.name}
       />
 
       <Input
-        label="Email"
+        label={t("auth.email")}
         value={formData.email}
-        onChangeText={(email) => setFormData({...formData, email})}
+        onChangeText={(email) => setFormData({ ...formData, email })}
         keyboardType="email-address"
         error={errors.email}
       />
 
       <Input
-        label="Phone"
+        label={t("auth.phone")}
         value={formData.phone}
-        onChangeText={(phone) => setFormData({...formData, phone})}
+        onChangeText={(phone) => setFormData({ ...formData, phone })}
         keyboardType="phone-pad"
         error={errors.phone}
       />
 
       <Input
-        label="Password"
+        label={t("auth.password")}
         value={formData.password}
-        onChangeText={(password) => setFormData({...formData, password})}
+        onChangeText={(password) => setFormData({ ...formData, password })}
         secureTextEntry
         error={errors.password}
       />
 
       <Input
-        label="Confirm Password"
+        label={t("auth.confirmPassword")}
         value={formData.confirmPassword}
-        onChangeText={(confirmPassword) => setFormData({...formData, confirmPassword})}
+        onChangeText={(confirmPassword) =>
+          setFormData({ ...formData, confirmPassword })
+        }
         secureTextEntry
         error={errors.confirmPassword}
       />
 
-      <Button title="Register" onPress={handleRegister} loading={loading} containerStyle={styles.button} />
+      <Button
+        title={t("auth.register")}
+        onPress={handleRegister}
+        loading={loading}
+        containerStyle={styles.button}
+      />
 
       <View style={styles.footer}>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.linkText}>Back to Login</Text>
+          <Text style={styles.linkText}>{t("auth.backToLogin")}</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
@@ -86,8 +104,8 @@ const RegisterScreen = ({navigation}: any) => {
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: COLORS.WHITE},
-  content: {padding: 20, justifyContent: "center", flexGrow: 1},
+  container: { flex: 1, backgroundColor: COLORS.WHITE },
+  content: { padding: 20, justifyContent: "center", flexGrow: 1 },
   headerContainer: {
     marginBottom: 40,
     alignItems: "center",
@@ -104,9 +122,9 @@ const styles = StyleSheet.create({
     color: COLORS.GRAY,
     textAlign: "center",
   },
-  button: {marginTop: 20, width: "100%"},
-  footer: {marginTop: 20, alignItems: "center"},
-  linkText: {color: COLORS.PRIMARY, fontWeight: "600", textAlign: "center"},
+  button: { marginTop: 20, width: "100%" },
+  footer: { marginTop: 20, alignItems: "center" },
+  linkText: { color: COLORS.PRIMARY, fontWeight: "600", textAlign: "center" },
 });
 
 export default RegisterScreen;

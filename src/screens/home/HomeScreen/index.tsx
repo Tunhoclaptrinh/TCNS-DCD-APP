@@ -13,10 +13,12 @@ import { COLORS } from "@/src/styles/colors";
 import { useAuth } from "@/src/hooks/useAuth";
 import { useTheme } from "@/src/hooks/useTheme";
 import { ROUTE_NAMES } from "@/src/config/routes.config";
+import { useTranslation } from "@/src/utils/i18n";
 
 const HomeScreen = ({ navigation }: any) => {
   const { user } = useAuth();
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
 
   const onRefresh = useCallback(async () => {
@@ -41,7 +43,7 @@ const HomeScreen = ({ navigation }: any) => {
       >
         <View>
           <Text style={[styles.greeting, { color: colors.TEXT_SECONDARY }]}>
-            Welcome back,
+            {t("home.welcomeBack")}
           </Text>
           <Text style={[styles.headerTitle, { color: colors.TEXT_PRIMARY }]}>
             {user?.name || user?.fullName || "Guest"}
@@ -90,7 +92,7 @@ const HomeScreen = ({ navigation }: any) => {
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
-          Quick Actions
+          {t("home.quickActions")}
         </Text>
         <View style={styles.actionsGrid}>
           <TouchableOpacity
@@ -113,7 +115,7 @@ const HomeScreen = ({ navigation }: any) => {
               />
             </View>
             <Text style={[styles.actionLabel, { color: colors.TEXT_PRIMARY }]}>
-              Profile
+              {t("home.profileCard")}
             </Text>
           </TouchableOpacity>
 
@@ -139,7 +141,7 @@ const HomeScreen = ({ navigation }: any) => {
               />
             </View>
             <Text style={[styles.actionLabel, { color: colors.TEXT_PRIMARY }]}>
-              Alerts
+              {t("home.alertsCard")}
             </Text>
           </TouchableOpacity>
         </View>

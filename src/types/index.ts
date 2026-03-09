@@ -18,6 +18,7 @@ export interface Metadata {
 }
 
 export interface User extends BaseEntity {
+  data: User | undefined;
   username?: string;
   name: string;
   email: string;
@@ -35,6 +36,7 @@ export interface User extends BaseEntity {
 }
 
 export interface AuthResponse {
+  data: AuthResponse | undefined;
   token: string;
   user: User;
   refreshToken?: string;

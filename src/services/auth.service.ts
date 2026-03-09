@@ -14,25 +14,51 @@ class AuthServiceClass {
    * Login user
    */
   async login(credentials: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<BaseApiResponse<AuthResponse>>(ENDPOINTS.AUTH.LOGIN, credentials);
-    // Adjust based on actual backend response structure
-    // If backend returns { success: true, data: { token, user } }
-    if (response.data && response.data.data) {
+    try {
+      const response = await apiClient.post<BaseApiResponse<AuthResponse>>(
+        ENDPOINTS.AUTH.LOGIN,
+        credentials,
+        { timeout: 90000 }, // Extended timeout for cold starts
+      );
+      // Adjust based on actual backend response structure
+      // If backend returns { success: true, data: { token, user } }
+      if (response.data && response.data.data) {
         return response.data.data;
+      }
+      // Fallback if response.data IS the data (depends on axios interceptor)
+      return response.data as unknown as AuthResponse;
+    } catch (error: any) {
+      if (error.code === "ECONNABORTED") {
+        throw new Error(
+          "Server is starting up (cold start). Please try again in a moment.",
+        );
+      }
+      throw error;
     }
-    // Fallback if response.data IS the data (depends on axios interceptor)
-    return response.data as unknown as AuthResponse;
   }
 
   /**
    * Register new user
    */
   async register(data: RegisterRequest): Promise<AuthResponse> {
-    const response = await apiClient.post<BaseApiResponse<AuthResponse>>(ENDPOINTS.AUTH.REGISTER, data);
-     if (response.data && response.data.data) {
+    try {
+      const response = await apiClient.post<BaseApiResponse<AuthResponse>>(
+        ENDPOINTS.AUTH.REGISTER,
+        data,
+        { timeout: 90000 }, // Extended timeout for cold starts
+      );
+      if (response.data && response.data.data) {
         return response.data.data;
+      }
+      return response.data as unknown as AuthResponse;
+    } catch (error: any) {
+      if (error.code === "ECONNABORTED") {
+        throw new Error(
+          "Server is starting up (cold start). Please try again in a moment.",
+        );
+      }
+      throw error;
     }
-    return response.data as unknown as AuthResponse;
   }
 
   /**
@@ -46,9 +72,11 @@ class AuthServiceClass {
    * Get current user
    */
   async getMe(): Promise<User> {
-    const response = await apiClient.get<BaseApiResponse<User>>(ENDPOINTS.AUTH.ME);
-     if (response.data && response.data.data) {
-        return response.data.data;
+    const response = await apiClient.get<BaseApiResponse<User>>(
+      ENDPOINTS.AUTH.ME,
+    );
+    if (response.data && response.data.data) {
+      return response.data.data;
     }
     return response.data as unknown as User;
   }
@@ -56,7 +84,10 @@ class AuthServiceClass {
   /**
    * Change password
    */
-  async changePassword(currentPassword: string, newPassword: string): Promise<void> {
+  async changePassword(
+    currentPassword: string,
+    newPassword: string,
+  ): Promise<void> {
     await apiClient.put(ENDPOINTS.AUTH.CHANGE_PASSWORD, {
       currentPassword,
       newPassword,
@@ -66,10 +97,10 @@ class AuthServiceClass {
   /**
    * Refresh token (if implemented)
    */
-  async refreshToken(): Promise<{token: string}> {
+  async refreshToken(): Promise<{ token: string }> {
     // Assuming backend endpoint exists or is standard
     // Note: api.client.ts usually handles refresh token logic automatically via interceptors
-    return { token: "" }; 
+    return { token: "" };
   }
 }
 

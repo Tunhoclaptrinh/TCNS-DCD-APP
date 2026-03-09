@@ -1,8 +1,14 @@
-import { View, Text, TouchableOpacity, Linking, ScrollView } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  ScrollView,
+} from "react-native";
+import { useTranslation } from "@/src/utils/i18n";
 
 export default function SupportScreen() {
-  const navigation = useNavigation<any>();
+  const { t } = useTranslation();
 
   const openEmail = () => Linking.openURL("mailto:support@baseapp.com");
   const openPhone = () => Linking.openURL("tel:0123456789");
@@ -21,11 +27,11 @@ export default function SupportScreen() {
           marginBottom: 10,
         }}
       >
-        Trung tâm trợ giúp
+        {t("support.helpCenter")}
       </Text>
 
       <Text style={{ fontSize: 15, color: "#555", marginBottom: 25 }}>
-        Nơi bạn có thể xem hướng dẫn và tìm câu trả lời cho các vấn đề thường gặp khi sử dụng ứng dụng.
+        {t("support.helpDesc")}
       </Text>
 
       {/* SECTION 1 — CONTACT */}
@@ -37,7 +43,7 @@ export default function SupportScreen() {
           color: "#333",
         }}
       >
-        Kênh liên hệ hỗ trợ
+        {t("support.contactChannels")}
       </Text>
 
       <View
@@ -84,7 +90,7 @@ export default function SupportScreen() {
           <Text style={{ fontSize: 28, marginRight: 12 }}>📞</Text>
           <View>
             <Text style={{ fontSize: 16, fontWeight: "600", color: "#FF7A00" }}>
-              Hotline
+              {t("support.hotline")}
             </Text>
             <Text style={{ fontSize: 14, color: "#555" }}>0123 456 789</Text>
           </View>
@@ -101,7 +107,7 @@ export default function SupportScreen() {
           marginBottom: 40,
         }}
       >
-        Hệ thống luôn sẵn sàng hỗ trợ bạn 24/7.
+        {t("support.alwaysReady")}
       </Text>
     </ScrollView>
   );
