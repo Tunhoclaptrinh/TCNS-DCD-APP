@@ -1,7 +1,8 @@
 export const API_CONFIG = {
   // Use 10.0.2.2 for Android Emulator to access host machine's localhost
   BASE_URL: process.env.EXPO_PUBLIC_API_URL || "http://192.168.1.37:3000/api",
-  TIMEOUT: 30000,
+  TIMEOUT: 60000, // Increased to 60s for Render cold starts
+  AUTH_TIMEOUT: 90000, // 90s for auth endpoints (handles cold starts)
   RETRY_COUNT: 3,
 };
 
@@ -33,7 +34,8 @@ export const ENDPOINTS = {
   FAVORITES: {
     BASE: "/favorites",
     GET_BY_TYPE: (type: string) => `/favorites/${type}`,
-    TOGGLE: (type: string, id: number | string) => `/favorites/${type}/${id}/toggle`,
+    TOGGLE: (type: string, id: number | string) =>
+      `/favorites/${type}/${id}/toggle`,
   },
 
   // Reviews/Comments

@@ -23,6 +23,7 @@ import { Ionicons } from "@expo/vector-icons";
 import EmptyState from "@/src/components/common/EmptyState/EmptyState";
 import { COLORS } from "@/src/styles/colors";
 import { useTheme } from "@/src/hooks/useTheme";
+import { useTranslation } from "@/src/utils/i18n";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import styles from "./styles";
@@ -31,6 +32,7 @@ import { Notification } from "@/src/services/notification.service";
 const NotificationsScreen = ({ navigation }: any) => {
   const dispatch = useDispatch<any>();
   const { colors, isDark } = useTheme();
+  const { t, locale } = useTranslation();
   const { items, loading, unreadCount } = useSelector(
     (state: RootState) => state.notifications,
   );
@@ -68,36 +70,48 @@ const NotificationsScreen = ({ navigation }: any) => {
   };
 
   const handleDeleteNotification = (id: number, title: string) => {
-    Alert.alert("Xóa thông báo", `Bạn có chắc muốn xóa "${title}"?`, [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Xóa",
-        onPress: () => dispatch(deleteNotification(id)),
-        style: "destructive",
-      },
-    ]);
+    Alert.alert(
+      t("notifications.deleteNotification"),
+      t("notifications.deleteConfirm", { title }),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("common.delete"),
+          onPress: () => dispatch(deleteNotification(id)),
+          style: "destructive",
+        },
+      ],
+    );
   };
 
   const handleMarkAllAsRead = () => {
     if (unreadCount === 0) {
-      Alert.alert("Thông báo", "Tất cả thông báo đã được đọc");
+      Alert.alert(t("notifications.notifications"), t("notifications.allRead"));
       return;
     }
-    Alert.alert("Đánh dấu đã đọc", "Đánh dấu tất cả thông báo là đã đọc?", [
-      { text: "Hủy", style: "cancel" },
-      { text: "Đồng ý", onPress: () => dispatch(markAllAsRead()) },
-    ]);
+    Alert.alert(
+      t("notifications.markAllAsRead"),
+      t("notifications.markAllAsRead") + "?",
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        { text: t("common.confirm"), onPress: () => dispatch(markAllAsRead()) },
+      ],
+    );
   };
 
   const handleClearAll = () => {
-    Alert.alert("Xóa tất cả", "Bạn có chắc muốn xóa tất cả thông báo?", [
-      { text: "Hủy", style: "cancel" },
-      {
-        text: "Xóa tất cả",
-        onPress: () => dispatch(clearAllNotifications()),
-        style: "destructive",
-      },
-    ]);
+    Alert.alert(
+      t("notifications.clearAll"),
+      t("notifications.clearAllConfirm"),
+      [
+        { text: t("common.cancel"), style: "cancel" },
+        {
+          text: t("notifications.clearAll"),
+          onPress: () => dispatch(clearAllNotifications()),
+          style: "destructive",
+        },
+      ],
+    );
   };
 
   const getNotificationIcon = (type: string) => {
@@ -137,7 +151,7 @@ const NotificationsScreen = ({ navigation }: any) => {
         locale: vi,
       });
     } catch {
-      return "Vừa xong";
+      return t("notifications.justNow");
     }
   };
 
@@ -152,7 +166,7 @@ const NotificationsScreen = ({ navigation }: any) => {
         <View style={styles.centered}>
           <ActivityIndicator size="large" color={COLORS.PRIMARY} />
           <Text style={[styles.loadingText, { color: colors.TEXT_SECONDARY }]}>
-            Đang tải thông báo...
+            {t("notifications.loadingNotifications")}
           </Text>
         </View>
       </SafeAreaView>
@@ -180,7 +194,7 @@ const NotificationsScreen = ({ navigation }: any) => {
               selectedTab === "all" && styles.tabTextActive,
             ]}
           >
-            Tất cả ({items.length})
+            {t("notifications.all")} ({items.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -198,7 +212,7 @@ const NotificationsScreen = ({ navigation }: any) => {
               selectedTab === "unread" && styles.tabTextActive,
             ]}
           >
-            Chưa đọc ({unreadCount})
+            {t("notifications.unread")} ({unreadCount})
           </Text>
         </TouchableOpacity>
         <View style={styles.headerActions}>
@@ -229,13 +243,13 @@ const NotificationsScreen = ({ navigation }: any) => {
           icon="notifications-off-outline"
           title={
             selectedTab === "unread"
-              ? "Không có thông báo chưa đọc"
-              : "Chưa có thông báo"
+              ? t("notifications.noUnreadNotifications")
+              : t("notifications.noNotifications")
           }
           subtitle={
             selectedTab === "unread"
-              ? "Tất cả thông báo đã được đọc"
-              : "Bạn sẽ nhận được thông báo ở đây"
+              ? t("notifications.allRead")
+              : t("notifications.youWillReceiveNotificationsHere")
           }
         />
       ) : (

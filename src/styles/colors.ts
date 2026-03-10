@@ -12,6 +12,7 @@ export const COLORS = {
   WHITE: "#FFFFFF",
   BLACK: "#000000",
   BORDER: "#E5E7EB",
+  LIGHT_BLUE: "#EBF5FF",
 };
 
 export const ORDER_STATUS_COLOR: Record<string, string> = {

@@ -26,11 +26,27 @@ export const login = createAsyncThunk<
   AuthResponse,
   LoginRequest,
   { rejectValue: string }
->("auth/login", async (credentials, { rejectWithValue }) => {
+>("auth/login", async (credentials, { rejectWithValue, getState }) => {
   try {
     const response = await AuthService.login(credentials);
     await StorageService.setToken(response.token);
     await StorageService.setUser(response.user);
+
+    // Kiểm tra xem biometrics có được bật không
+    const state = getState() as any;
+    const biometricsEnabled = state.settings?.biometricsEnabled;
+
+    console.log("🔐 Login - Biometrics enabled:", biometricsEnabled);
+
+    // Nếu biometrics được bật, lưu credentials để sử dụng cho lần đăng nhập tiếp theo
+    if (biometricsEnabled && credentials.email && credentials.password) {
+      await StorageService.setBiometricCredentials(
+        credentials.email,
+        credentials.password,
+      );
+      console.log("✅ Biometric credentials saved for:", credentials.email);
+    }
+
     return response;
   } catch (error: any) {
     return rejectWithValue(error.message || "Đăng nhập thất bại");
@@ -60,6 +76,8 @@ export const logout = createAsyncThunk("auth/logout", async () => {
   } finally {
     await StorageService.removeToken();
     await StorageService.removeUser();
+    // Không xóa biometric credentials để user có thể đăng nhập lại bằng sinh trắc học
+    // Chỉ xóa khi user tắt tính năng sinh trắc học trong settings
   }
 });
 
@@ -85,7 +103,7 @@ export const updateUser = createAsyncThunk(
     } catch (error: any) {
       return rejectWithValue(error.message);
     }
-  }
+  },
 );
 
 const authSlice = createSlice({

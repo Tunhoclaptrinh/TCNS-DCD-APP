@@ -22,15 +22,22 @@ export const loadSettings = createAsyncThunk(
     try {
       const theme = await AsyncStorage.getItem("theme");
       const language = await AsyncStorage.getItem("language");
+      const biometricsEnabled = await AsyncStorage.getItem("biometric_enabled");
+
       return {
         theme: (theme as "light" | "dark") || "light",
         language: (language as "vi" | "en") || "vi",
+        biometricsEnabled: biometricsEnabled === "true",
       };
     } catch (error) {
       console.error("Failed to load settings:", error);
-      return { theme: "light" as const, language: "vi" as const };
+      return {
+        theme: "light" as const,
+        language: "vi" as const,
+        biometricsEnabled: false,
+      };
     }
-  }
+  },
 );
 
 const settingsSlice = createSlice({
@@ -40,15 +47,15 @@ const settingsSlice = createSlice({
     setTheme(state, action: PayloadAction<"light" | "dark">) {
       state.theme = action.payload;
       // Persist to storage
-      AsyncStorage.setItem("theme", action.payload).catch(err =>
-        console.error("Failed to save theme:", err)
+      AsyncStorage.setItem("theme", action.payload).catch((err) =>
+        console.error("Failed to save theme:", err),
       );
     },
     setLanguage(state, action: PayloadAction<"vi" | "en">) {
       state.language = action.payload;
       // Persist to storage
-      AsyncStorage.setItem("language", action.payload).catch(err =>
-        console.error("Failed to save language:", err)
+      AsyncStorage.setItem("language", action.payload).catch((err) =>
+        console.error("Failed to save language:", err),
       );
     },
     toggleNotifications(state) {
@@ -56,15 +63,24 @@ const settingsSlice = createSlice({
     },
     toggleBiometrics(state) {
       state.biometricsEnabled = !state.biometricsEnabled;
+      // Persist to storage
+      AsyncStorage.setItem(
+        "biometric_enabled",
+        state.biometricsEnabled.toString(),
+      ).catch((err) =>
+        console.error("Failed to save biometrics setting:", err),
+      );
     },
   },
   extraReducers: (builder) => {
     builder.addCase(loadSettings.fulfilled, (state, action) => {
       state.theme = action.payload.theme;
       state.language = action.payload.language;
+      state.biometricsEnabled = action.payload.biometricsEnabled;
     });
   },
 });
 
-export const { setTheme, setLanguage, toggleNotifications, toggleBiometrics } = settingsSlice.actions;
+export const { setTheme, setLanguage, toggleNotifications, toggleBiometrics } =
+  settingsSlice.actions;
 export default settingsSlice.reducer;

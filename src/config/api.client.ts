@@ -1,4 +1,4 @@
-import axios, { AxiosInstance, AxiosError } from "axios";
+import axios, { AxiosInstance, AxiosError, AxiosRequestConfig } from "axios";
 import { API_CONFIG } from "../config/api.config";
 import { StorageService } from "../utils/storage";
 
@@ -47,24 +47,24 @@ class ApiClient {
     );
   }
 
-  get<T>(url: string, params?: any): Promise<T> {
-    return this.client.get(url, { params }) as Promise<T>;
+  get<T>(url: string, params?: any, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.get(url, { params, ...config }) as Promise<T>;
   }
 
-  post<T>(url: string, data?: any): Promise<T> {
-    return this.client.post(url, data) as Promise<T>;
+  post<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.post(url, data, config) as Promise<T>;
   }
 
-  put<T>(url: string, data?: any): Promise<T> {
-    return this.client.put(url, data) as Promise<T>;
+  put<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.put(url, data, config) as Promise<T>;
   }
 
-  patch<T>(url: string, data?: any): Promise<T> {
-    return this.client.patch(url, data) as Promise<T>;
+  patch<T>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.patch(url, data, config) as Promise<T>;
   }
 
-  delete<T>(url: string): Promise<T> {
-    return this.client.delete(url) as Promise<T>;
+  delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
+    return this.client.delete(url, config) as Promise<T>;
   }
 
   setBaseUrl(url: string) {

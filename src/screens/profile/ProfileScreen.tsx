@@ -28,6 +28,7 @@ import {
   fetchUnreadCount,
 } from "@/src/store/slices/notificationSlice";
 import { UserService } from "@/src/services/user.service";
+import { useTranslation } from "@/src/utils/i18n";
 
 interface UserStats {
   totalReviews: number;
@@ -41,6 +42,7 @@ type TabType = "profile" | "activity" | "security";
 const ProfileScreen = ({ navigation }: any) => {
   const { user, signOut, refreshUser } = useAuth();
   const { colors, isDark } = useTheme();
+  const { t } = useTranslation();
   const [stats, setStats] = useState<UserStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -96,10 +98,10 @@ const ProfileScreen = ({ navigation }: any) => {
   };
 
   const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to log out?", [
-      { text: "Cancel", style: "cancel" },
+    Alert.alert(t("auth.logout"), t("auth.logoutConfirm"), [
+      { text: t("common.cancel"), style: "cancel" },
       {
-        text: "Logout",
+        text: t("auth.logout"),
         onPress: async () => {
           await signOut();
         },
@@ -147,7 +149,7 @@ const ProfileScreen = ({ navigation }: any) => {
             },
           ]}
         >
-          Profile
+          {t("profile.profile")}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -182,7 +184,7 @@ const ProfileScreen = ({ navigation }: any) => {
             },
           ]}
         >
-          Activity
+          {t("profile.activity")}
         </Text>
       </TouchableOpacity>
       <TouchableOpacity
@@ -217,7 +219,7 @@ const ProfileScreen = ({ navigation }: any) => {
             },
           ]}
         >
-          Security
+          {t("profile.security")}
         </Text>
       </TouchableOpacity>
     </View>
@@ -249,7 +251,7 @@ const ProfileScreen = ({ navigation }: any) => {
             <Text
               style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
             >
-              Favorites
+              {t("profile.favorites")}
             </Text>
           </TouchableOpacity>
 
@@ -273,7 +275,7 @@ const ProfileScreen = ({ navigation }: any) => {
             <Text
               style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
             >
-              Collections
+              {t("profile.collections")}
             </Text>
           </TouchableOpacity>
         </View>
@@ -287,7 +289,7 @@ const ProfileScreen = ({ navigation }: any) => {
             { color: isDark ? colors.TEXT_SECONDARY : "#8f8989" },
           ]}
         >
-          Account Settings
+          {t("profile.accountSettings")}
         </Text>
         <View
           style={[
@@ -320,7 +322,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? COLORS.WHITE : COLORS.DARK },
                 ]}
               >
-                Edit Profile
+                {t("profile.editProfile")}
               </Text>
               <Text
                 style={[
@@ -328,7 +330,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? "#999" : COLORS.GRAY },
                 ]}
               >
-                Update personal information
+                {t("profile.updatePersonalInfo")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
@@ -361,7 +363,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? COLORS.WHITE : COLORS.DARK },
                 ]}
               >
-                Notifications
+                {t("notifications.notifications")}
               </Text>
               <Text
                 style={[
@@ -369,7 +371,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? "#999" : COLORS.GRAY },
                 ]}
               >
-                {unreadCount} new alerts
+                {unreadCount} {t("profile.newAlerts")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
@@ -400,7 +402,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? COLORS.WHITE : COLORS.DARK },
                 ]}
               >
-                Settings
+                {t("settings.settings")}
               </Text>
               <Text
                 style={[
@@ -408,7 +410,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? "#999" : COLORS.GRAY },
                 ]}
               >
-                Language, theme...
+                {t("profile.languageTheme")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
@@ -439,7 +441,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? COLORS.WHITE : COLORS.DARK },
                 ]}
               >
-                Terms & Privacy
+                {t("profile.termsPrivacy")}
               </Text>
               <Text
                 style={[
@@ -447,7 +449,7 @@ const ProfileScreen = ({ navigation }: any) => {
                   { color: isDark ? "#999" : COLORS.GRAY },
                 ]}
               >
-                Terms of use & Privacy policy
+                {t("profile.termsPrivacyDesc")}
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={20} color={COLORS.GRAY} />
@@ -458,7 +460,7 @@ const ProfileScreen = ({ navigation }: any) => {
       {/* Bio Section */}
       {user?.bio && (
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>About Me</Text>
+          <Text style={styles.sectionTitle}>{t("profile.aboutMe")}</Text>
           <View style={styles.bioContainer}>
             <Text style={styles.bioText}>{user.bio}</Text>
           </View>
@@ -475,7 +477,7 @@ const ProfileScreen = ({ navigation }: any) => {
           { color: isDark ? colors.TEXT_SECONDARY : "#8f8989" },
         ]}
       >
-        Recent Activity
+        {t("profile.recentActivity")}
       </Text>
       {activityLoading ? (
         <ActivityIndicator color={COLORS.PRIMARY} style={{ marginTop: 20 }} />
@@ -537,7 +539,7 @@ const ProfileScreen = ({ navigation }: any) => {
                 marginTop: 20,
               }}
             >
-              No activity yet.
+              {t("profile.noActivityYet")}
             </Text>
           )}
         </View>
@@ -567,12 +569,12 @@ const ProfileScreen = ({ navigation }: any) => {
             <Text
               style={[styles.securityTitle, { color: colors.TEXT_PRIMARY }]}
             >
-              Account Protected
+              {t("profile.accountProtected")}
             </Text>
             <Text
               style={[styles.securityDesc, { color: colors.TEXT_SECONDARY }]}
             >
-              Your password is strong and secure.
+              {t("profile.passwordSecure")}
             </Text>
           </View>
         </View>
@@ -581,17 +583,19 @@ const ProfileScreen = ({ navigation }: any) => {
           style={styles.changePassBtn}
           onPress={() => navigation.navigate("ChangePassword")}
         >
-          <Text style={styles.changePassText}>Change Password</Text>
+          <Text style={styles.changePassText}>
+            {t("profile.changePassword")}
+          </Text>
         </TouchableOpacity>
 
         <View style={[styles.loginHistory, { borderTopColor: colors.BORDER }]}>
           <Text style={[styles.historyTitle, { color: colors.TEXT_SECONDARY }]}>
-            Last Login:
+            {t("profile.lastLogin")}
           </Text>
           <Text style={[styles.historyValue, { color: colors.TEXT_PRIMARY }]}>
             {user?.updatedAt
               ? new Date(user.updatedAt).toLocaleString()
-              : "Just now"}
+              : t("profile.justNow")}
           </Text>
         </View>
       </View>
@@ -694,7 +698,7 @@ const ProfileScreen = ({ navigation }: any) => {
           activeOpacity={0.7}
         >
           <Ionicons name="log-out-outline" size={22} color={COLORS.WHITE} />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>{t("auth.logout")}</Text>
         </TouchableOpacity>
       </View>
 
