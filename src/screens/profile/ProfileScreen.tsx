@@ -569,12 +569,12 @@ const ProfileScreen = ({ navigation }: any) => {
             <Text
               style={[styles.securityTitle, { color: colors.TEXT_PRIMARY }]}
             >
-              Account Protected
+              {t("profile.accountProtected")}
             </Text>
             <Text
               style={[styles.securityDesc, { color: colors.TEXT_SECONDARY }]}
             >
-              Your password is strong and secure.
+              {t("profile.passwordSecure")}
             </Text>
           </View>
         </View>
@@ -583,17 +583,19 @@ const ProfileScreen = ({ navigation }: any) => {
           style={styles.changePassBtn}
           onPress={() => navigation.navigate("ChangePassword")}
         >
-          <Text style={styles.changePassText}>Change Password</Text>
+          <Text style={styles.changePassText}>
+            {t("profile.changePassword")}
+          </Text>
         </TouchableOpacity>
 
         <View style={[styles.loginHistory, { borderTopColor: colors.BORDER }]}>
           <Text style={[styles.historyTitle, { color: colors.TEXT_SECONDARY }]}>
-            Last Login:
+            {t("profile.lastLogin")}
           </Text>
           <Text style={[styles.historyValue, { color: colors.TEXT_PRIMARY }]}>
             {user?.updatedAt
               ? new Date(user.updatedAt).toLocaleString()
-              : "Just now"}
+              : t("profile.justNow")}
           </Text>
         </View>
       </View>
@@ -696,7 +698,7 @@ const ProfileScreen = ({ navigation }: any) => {
           activeOpacity={0.7}
         >
           <Ionicons name="log-out-outline" size={22} color={COLORS.WHITE} />
-          <Text style={styles.logoutText}>Logout</Text>
+          <Text style={styles.logoutText}>{t("auth.logout")}</Text>
         </TouchableOpacity>
       </View>
 
