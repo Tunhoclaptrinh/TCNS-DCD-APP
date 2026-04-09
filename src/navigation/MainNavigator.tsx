@@ -18,6 +18,7 @@ import ChangePasswordScreen from "../screens/profile/ChangePasswordScreen";
 import TermsPrivacyScreen from "../screens/profile/TermsPrivacyScreen";
 import SupportScreen from "../screens/profile/SupportScreen";
 import NotificationSettingsScreen from "../screens/profile/NotificationSettingsScreen";
+import DutyScreen from "../screens/duty/DutyScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -72,6 +73,27 @@ const HomeStack = () => {
         options={({ navigation }: any) =>
           CustomBackHeader(navigation, "Notifications")
         }
+      />
+    </Stack.Navigator>
+  );
+};
+
+const DutyStack = () => {
+  const { colors } = useTheme();
+
+  const GLOBAL_HEADER_OPTIONS = {
+    ...SCREEN_OPTIONS.DEFAULT_HEADER,
+    headerStyle: { backgroundColor: COLORS.PRIMARY },
+    headerTintColor: COLORS.WHITE,
+    headerRight: () => <HeaderLogo />,
+  };
+
+  return (
+    <Stack.Navigator screenOptions={GLOBAL_HEADER_OPTIONS}>
+      <Stack.Screen
+        name={ROUTE_NAMES.DUTY.SCREEN}
+        component={DutyScreen}
+        options={{ title: "Lịch trực", headerBackVisible: false }}
       />
     </Stack.Navigator>
   );
@@ -178,6 +200,10 @@ const MainNavigator = () => {
             iconName = focused
               ? SCREEN_OPTIONS.TAB_ICONS.HOME.focused
               : SCREEN_OPTIONS.TAB_ICONS.HOME.unfocused;
+          } else if (route.name === ROUTE_NAMES.TABS.DUTY) {
+            iconName = focused
+              ? SCREEN_OPTIONS.TAB_ICONS.DUTY.focused
+              : SCREEN_OPTIONS.TAB_ICONS.DUTY.unfocused;
           } else if (route.name === ROUTE_NAMES.TABS.PROFILE) {
             iconName = focused
               ? SCREEN_OPTIONS.TAB_ICONS.PROFILE.focused
@@ -196,12 +222,17 @@ const MainNavigator = () => {
       <Tab.Screen
         name={ROUTE_NAMES.TABS.HOME}
         component={HomeStack}
-        options={{ tabBarLabel: "Home" }}
+        options={{ tabBarLabel: "Trang chủ" }}
+      />
+      <Tab.Screen
+        name={ROUTE_NAMES.TABS.DUTY}
+        component={DutyStack}
+        options={{ tabBarLabel: "Lịch trực" }}
       />
       <Tab.Screen
         name={ROUTE_NAMES.TABS.PROFILE}
         component={ProfileStack}
-        options={{ tabBarLabel: "Profile" }}
+        options={{ tabBarLabel: "Cá nhân" }}
       />
     </Tab.Navigator>
   );

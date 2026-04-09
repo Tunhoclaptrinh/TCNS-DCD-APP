@@ -73,28 +73,97 @@ const HomeScreen = ({ navigation }: any) => {
         contentContainerStyle={styles.scrollContent}
       >
         <View style={[styles.mainCard, { backgroundColor: colors.PRIMARY }]}>
-          <Text style={[styles.cardTitle, { color: COLORS.WHITE }]}>
-            Base App Project
-          </Text>
+          <View style={styles.cardHeader}>
+             <Ionicons name="flag" size={32} color={COLORS.WHITE} />
+             <Text style={[styles.cardTitle, { color: COLORS.WHITE }]}>
+               Đội Cờ Đỏ PTIT
+             </Text>
+          </View>
           <Text
             style={[
               styles.cardText,
               {
                 color: isDark
-                  ? "rgba(255,255,255,0.7)"
-                  : "rgba(255,255,255,0.8)",
+                  ? "rgba(255,255,255,0.8)"
+                  : "rgba(255,255,255,0.9)",
               },
             ]}
           >
-            This is a solid foundation for your mobile application. Start
-            building your unique features by adding new screens and logic.
+            Nền tảng quản lý nhân sự và điều hành hoạt động trực thuộc Học viện Công nghệ Bưu chính Viễn thông.
           </Text>
+        </View>
+
+        {/* Statistics Row - Synthetic from Web Dashboard */}
+        <View style={styles.statsContainer}>
+          <View style={[styles.statItem, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
+            <Text style={[styles.statValue, { color: colors.PRIMARY }]}>156</Text>
+            <Text style={[styles.statLabel, { color: colors.TEXT_SECONDARY }]}>Thành viên</Text>
+          </View>
+          <View style={[styles.statItem, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
+            <Text style={[styles.statValue, { color: "#52c41a" }]}>12</Text>
+            <Text style={[styles.statLabel, { color: colors.TEXT_SECONDARY }]}>Đang trực</Text>
+          </View>
+          <View style={[styles.statItem, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
+            <Text style={[styles.statValue, { color: "#1890ff" }]}>5</Text>
+            <Text style={[styles.statLabel, { color: colors.TEXT_SECONDARY }]}>Mới</Text>
+          </View>
         </View>
 
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>
           {t("home.quickActions")}
         </Text>
         <View style={styles.actionsGrid}>
+          {/* Lịch trực - Navigate to Duty Tab */}
+          <TouchableOpacity
+            style={[
+              styles.actionItem,
+              { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER },
+            ]}
+            onPress={() => navigation.navigate(ROUTE_NAMES.TABS.DUTY)}
+          >
+            <View
+              style={[
+                styles.actionIcon,
+                { backgroundColor: isDark ? "#1e3a5f" : "#E3F2FD" },
+              ]}
+            >
+              <Ionicons
+                name="calendar"
+                size={24}
+                color={isDark ? "#64B5F6" : "#1976D2"}
+              />
+            </View>
+            <Text style={[styles.actionLabel, { color: colors.TEXT_PRIMARY }]}>
+              Lịch trực
+            </Text>
+          </TouchableOpacity>
+
+          {/* Đổi ca - Navigate to Duty Tab or specific screen */}
+          <TouchableOpacity
+            style={[
+              styles.actionItem,
+              { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER },
+            ]}
+            onPress={() => navigation.navigate(ROUTE_NAMES.TABS.DUTY)}
+          >
+            <View
+              style={[
+                styles.actionIcon,
+                { backgroundColor: isDark ? "#3e2818" : "#FFF3E0" },
+              ]}
+            >
+              <Ionicons
+                name="swap-horizontal"
+                size={24}
+                color={isDark ? "#FFB74D" : "#F57C00"}
+              />
+            </View>
+            <Text style={[styles.actionLabel, { color: colors.TEXT_PRIMARY }]}>
+              Đổi ca trực
+            </Text>
+          </TouchableOpacity>
+
+          {/* Danh sách đội */}
           <TouchableOpacity
             style={[
               styles.actionItem,
@@ -105,43 +174,42 @@ const HomeScreen = ({ navigation }: any) => {
             <View
               style={[
                 styles.actionIcon,
-                { backgroundColor: isDark ? "#1e3a5f" : "#E3F2FD" },
+                { backgroundColor: isDark ? "#1b3321" : "#E8F5E9" },
               ]}
             >
               <Ionicons
-                name="person-outline"
+                name="people-outline"
                 size={24}
-                color={isDark ? "#64B5F6" : "#1976D2"}
+                color={isDark ? "#81C784" : "#388E3C"}
               />
             </View>
             <Text style={[styles.actionLabel, { color: colors.TEXT_PRIMARY }]}>
-              {t("home.profileCard")}
+              Danh sách đội
             </Text>
           </TouchableOpacity>
 
+          {/* Hỗ trợ */}
           <TouchableOpacity
             style={[
               styles.actionItem,
               { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER },
             ]}
-            onPress={() =>
-              navigation.navigate(ROUTE_NAMES.COMMON.NOTIFICATIONS)
-            }
+            onPress={() => navigation.navigate("Support")}
           >
             <View
               style={[
                 styles.actionIcon,
-                { backgroundColor: isDark ? "#3e2818" : "#FFF3E0" },
+                { backgroundColor: isDark ? "#331b1b" : "#FFEBEE" },
               ]}
             >
               <Ionicons
-                name="notifications-outline"
+                name="help-circle-outline"
                 size={24}
-                color={isDark ? "#FFB74D" : "#F57C00"}
+                color={isDark ? "#E57373" : "#D32F2F"}
               />
             </View>
             <Text style={[styles.actionLabel, { color: colors.TEXT_PRIMARY }]}>
-              {t("home.alertsCard")}
+              Hỗ trợ
             </Text>
           </TouchableOpacity>
         </View>
@@ -198,6 +266,12 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 6,
   },
+  cardHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 12,
+  },
   cardTitle: {
     fontSize: 20,
     fontWeight: "bold",
@@ -208,6 +282,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "rgba(255,255,255,0.8)",
     lineHeight: 24,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24,
+    gap: 12,
+  },
+  statItem: {
+    flex: 1,
+    padding: 16,
+    borderRadius: 16,
+    alignItems: "center",
+    borderWidth: 1,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  statValue: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  statLabel: {
+    fontSize: 12,
+    fontWeight: "600",
   },
   sectionTitle: {
     fontSize: 18,

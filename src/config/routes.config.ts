@@ -11,6 +11,9 @@ export type RouteParams = {
   // Main Stack - Home
   HomeScreen: undefined;
 
+  // Main Stack - Duty
+  DutyScreen: undefined;
+
   // Main Stack - Profile
   ProfileScreen: undefined;
   EditProfile: undefined;
@@ -34,6 +37,7 @@ export const ROUTE_NAMES = {
   // Main Tabs
   TABS: {
     HOME: "Home",
+    DUTY: "Duty",
     PROFILE: "Profile",
   },
 
@@ -46,6 +50,11 @@ export const ROUTE_NAMES = {
   PROFILE: {
     SCREEN: "ProfileScreen",
     EDIT_PROFILE: "EditProfile",
+  },
+
+  // Duty Stack
+  DUTY: {
+    SCREEN: "DutyScreen",
   },
 
   // Common
@@ -81,10 +90,11 @@ export const SCREEN_OPTIONS = {
   // Tab bar icons
   TAB_ICONS: {
     HOME: {focused: "home", unfocused: "home-outline"},
+    DUTY: {focused: "calendar", unfocused: "calendar-outline"},
     PROFILE: {focused: "person", unfocused: "person-outline"},
   },
 } as const;
 
 // Navigation helper types
 export type RootStackParamList = RouteParams;
-export type TabParamList = Pick<RouteParams, "HomeScreen" | "ProfileScreen">;
+export type TabParamList = Pick<RouteParams, "HomeScreen" | "DutyScreen" | "ProfileScreen">;
