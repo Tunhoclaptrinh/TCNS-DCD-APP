@@ -13,10 +13,27 @@ export type RouteParams = {
 
   // Main Stack - Duty
   DutyScreen: undefined;
+  RegisterDuty: undefined;
+
+  // Main Stack - Meetings
+  MeetingList: undefined;
+  MeetingDetail: { meetingId?: string };
+  ManageMeeting: { meetingId?: string };
+
+  // Main Stack - Bonus
+  BonusCampaigns: undefined;
+  RegisterBonus: { campaignId?: string };
 
   // Main Stack - Profile
   ProfileScreen: undefined;
   EditProfile: undefined;
+  ActivityReport: undefined;
+  FinancialReport: undefined;
+  Feedback: undefined;
+
+  // Main Stack - Forms
+  FormList: undefined;
+  SubmitForm: { formType?: string };
 
   // Common
   Notifications: undefined;
@@ -55,6 +72,33 @@ export const ROUTE_NAMES = {
   // Duty Stack
   DUTY: {
     SCREEN: "DutyScreen",
+    REGISTER_DUTY: "RegisterDuty",
+  },
+
+  // Meetings Stack
+  MEETINGS: {
+    LIST: "MeetingList",
+    DETAIL: "MeetingDetail",
+    MANAGE: "ManageMeeting",
+  },
+
+  // Bonus Stack
+  BONUS: {
+    CAMPAIGNS: "BonusCampaigns",
+    REGISTER: "RegisterBonus",
+  },
+
+  // Forms Stack
+  FORMS: {
+    LIST: "FormList",
+    SUBMIT: "SubmitForm",
+  },
+
+  // Profile extras
+  PROFILE_EXTRAS: {
+    ACTIVITY_REPORT: "ActivityReport",
+    FINANCIAL_REPORT: "FinancialReport",
+    FEEDBACK: "Feedback",
   },
 
   // Common

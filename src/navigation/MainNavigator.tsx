@@ -19,6 +19,17 @@ import TermsPrivacyScreen from "../screens/profile/TermsPrivacyScreen";
 import SupportScreen from "../screens/profile/SupportScreen";
 import NotificationSettingsScreen from "../screens/profile/NotificationSettingsScreen";
 import DutyScreen from "../screens/duty/DutyScreen";
+import RegisterDutyScreen from "../screens/duty/RegisterDutyScreen";
+import MeetingListScreen from "../screens/meetings/MeetingListScreen";
+import MeetingDetailScreen from "../screens/meetings/MeetingDetailScreen";
+import ManageMeetingScreen from "../screens/meetings/ManageMeetingScreen";
+import BonusCampaignsScreen from "../screens/bonus/BonusCampaignsScreen";
+import RegisterBonusScreen from "../screens/bonus/RegisterBonusScreen";
+import ActivityReportScreen from "../screens/profile/ActivityReportScreen";
+import FinancialReportScreen from "../screens/profile/FinancialReportScreen";
+import FeedbackScreen from "../screens/profile/FeedbackScreen";
+import FormListScreen from "../screens/forms/FormListScreen";
+import SubmitFormScreen from "../screens/forms/SubmitFormScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -88,12 +99,109 @@ const DutyStack = () => {
     headerRight: () => <HeaderLogo />,
   };
 
+  const CustomBackHeader = (navigation: any, title?: string) => ({
+    headerBackVisible: false,
+    headerTitle: title,
+    headerLeft: () => (
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{ flexDirection: "row", alignItems: "center", paddingRight: 16, paddingLeft: 10 }}
+      >
+        <Ionicons name="arrow-back" size={24} color={COLORS.WHITE} />
+      </TouchableOpacity>
+    ),
+  });
+
   return (
     <Stack.Navigator screenOptions={GLOBAL_HEADER_OPTIONS}>
       <Stack.Screen
         name={ROUTE_NAMES.DUTY.SCREEN}
         component={DutyScreen}
         options={{ title: "Lịch trực", headerBackVisible: false }}
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.DUTY.REGISTER_DUTY}
+        component={RegisterDutyScreen}
+        options={({ navigation }: any) => CustomBackHeader(navigation, "Đăng ký lịch trực")}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const MeetingStack = () => {
+  const GLOBAL_HEADER_OPTIONS = {
+    ...SCREEN_OPTIONS.DEFAULT_HEADER,
+    headerStyle: { backgroundColor: COLORS.PRIMARY },
+    headerTintColor: COLORS.WHITE,
+    headerRight: () => <HeaderLogo />,
+  };
+
+  const CustomBackHeader = (navigation: any, title?: string) => ({
+    headerBackVisible: false,
+    headerTitle: title,
+    headerLeft: () => (
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{ flexDirection: "row", alignItems: "center", paddingRight: 16, paddingLeft: 10 }}
+      >
+        <Ionicons name="arrow-back" size={24} color={COLORS.WHITE} />
+      </TouchableOpacity>
+    ),
+  });
+
+  return (
+    <Stack.Navigator screenOptions={GLOBAL_HEADER_OPTIONS}>
+      <Stack.Screen
+        name={ROUTE_NAMES.MEETINGS.LIST}
+        component={MeetingListScreen}
+        options={{ title: "Lịch họp", headerBackVisible: false }}
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.MEETINGS.DETAIL}
+        component={MeetingDetailScreen}
+        options={({ navigation }: any) => CustomBackHeader(navigation, "Chi tiết cuộc họp")}
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.MEETINGS.MANAGE}
+        component={ManageMeetingScreen}
+        options={({ navigation }: any) => CustomBackHeader(navigation, "Quản lý lịch họp")}
+      />
+    </Stack.Navigator>
+  );
+};
+
+const BonusStack = () => {
+  const GLOBAL_HEADER_OPTIONS = {
+    ...SCREEN_OPTIONS.DEFAULT_HEADER,
+    headerStyle: { backgroundColor: COLORS.PRIMARY },
+    headerTintColor: COLORS.WHITE,
+    headerRight: () => <HeaderLogo />,
+  };
+
+  const CustomBackHeader = (navigation: any, title?: string) => ({
+    headerBackVisible: false,
+    headerTitle: title,
+    headerLeft: () => (
+      <TouchableOpacity
+        onPress={() => navigation.goBack()}
+        style={{ flexDirection: "row", alignItems: "center", paddingRight: 16, paddingLeft: 10 }}
+      >
+        <Ionicons name="arrow-back" size={24} color={COLORS.WHITE} />
+      </TouchableOpacity>
+    ),
+  });
+
+  return (
+    <Stack.Navigator screenOptions={GLOBAL_HEADER_OPTIONS}>
+      <Stack.Screen
+        name={ROUTE_NAMES.BONUS.CAMPAIGNS}
+        component={BonusCampaignsScreen}
+        options={{ title: "Cộng điểm", headerBackVisible: false }}
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.BONUS.REGISTER}
+        component={RegisterBonusScreen}
+        options={({ navigation }: any) => CustomBackHeader(navigation, "Đăng ký điểm cộng")}
       />
     </Stack.Navigator>
   );
@@ -183,6 +291,41 @@ const ProfileStack = () => {
           CustomBackHeader(navigation, "Notification Settings")
         }
       />
+      <Stack.Screen
+        name={ROUTE_NAMES.PROFILE_EXTRAS.ACTIVITY_REPORT}
+        component={ActivityReportScreen}
+        options={({ navigation }: any) =>
+          CustomBackHeader(navigation, "Thống kê hoạt động")
+        }
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.PROFILE_EXTRAS.FINANCIAL_REPORT}
+        component={FinancialReportScreen}
+        options={({ navigation }: any) =>
+          CustomBackHeader(navigation, "Tài chính cá nhân")
+        }
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.PROFILE_EXTRAS.FEEDBACK}
+        component={FeedbackScreen}
+        options={({ navigation }: any) =>
+          CustomBackHeader(navigation, "Đóng góp ý kiến")
+        }
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.FORMS.LIST}
+        component={FormListScreen}
+        options={({ navigation }: any) =>
+          CustomBackHeader(navigation, "Đơn từ")
+        }
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.FORMS.SUBMIT}
+        component={SubmitFormScreen}
+        options={({ navigation }: any) =>
+          CustomBackHeader(navigation, "Điền đơn")
+        }
+      />
     </Stack.Navigator>
   );
 };
@@ -204,6 +347,10 @@ const MainNavigator = () => {
             iconName = focused
               ? SCREEN_OPTIONS.TAB_ICONS.DUTY.focused
               : SCREEN_OPTIONS.TAB_ICONS.DUTY.unfocused;
+          } else if (route.name === "Meetings") {
+            iconName = focused ? "people" : "people-outline";
+          } else if (route.name === "Bonus") {
+            iconName = focused ? "star" : "star-outline";
           } else if (route.name === ROUTE_NAMES.TABS.PROFILE) {
             iconName = focused
               ? SCREEN_OPTIONS.TAB_ICONS.PROFILE.focused
@@ -228,6 +375,16 @@ const MainNavigator = () => {
         name={ROUTE_NAMES.TABS.DUTY}
         component={DutyStack}
         options={{ tabBarLabel: "Lịch trực" }}
+      />
+      <Tab.Screen
+        name="Meetings"
+        component={MeetingStack}
+        options={{ tabBarLabel: "Lịch họp" }}
+      />
+      <Tab.Screen
+        name="Bonus"
+        component={BonusStack}
+        options={{ tabBarLabel: "Điểm cộng" }}
       />
       <Tab.Screen
         name={ROUTE_NAMES.TABS.PROFILE}
