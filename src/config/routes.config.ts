@@ -13,7 +13,8 @@ export type RouteParams = {
 
   // Main Stack - Duty
   DutyScreen: undefined;
-  RegisterDuty: undefined;
+  RegisterDuty: { weekStart?: string };
+  EditShiftKip: { shiftId: number; kipId?: number; weekStart: string };
 
   // Main Stack - Meetings
   MeetingList: undefined;
@@ -73,6 +74,7 @@ export const ROUTE_NAMES = {
   DUTY: {
     SCREEN: "DutyScreen",
     REGISTER_DUTY: "RegisterDuty",
+    EDIT_SHIFT_KIP: "EditShiftKip",
   },
 
   // Meetings Stack

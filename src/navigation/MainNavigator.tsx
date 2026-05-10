@@ -20,6 +20,7 @@ import SupportScreen from "../screens/profile/SupportScreen";
 import NotificationSettingsScreen from "../screens/profile/NotificationSettingsScreen";
 import DutyScreen from "../screens/duty/DutyScreen";
 import RegisterDutyScreen from "../screens/duty/RegisterDutyScreen";
+import EditShiftKipScreen from "../screens/duty/EditShiftKipScreen";
 import MeetingListScreen from "../screens/meetings/MeetingListScreen";
 import MeetingDetailScreen from "../screens/meetings/MeetingDetailScreen";
 import ManageMeetingScreen from "../screens/meetings/ManageMeetingScreen";
@@ -123,6 +124,11 @@ const DutyStack = () => {
         name={ROUTE_NAMES.DUTY.REGISTER_DUTY}
         component={RegisterDutyScreen}
         options={({ navigation }: any) => CustomBackHeader(navigation, "Đăng ký lịch trực")}
+      />
+      <Stack.Screen
+        name={ROUTE_NAMES.DUTY.EDIT_SHIFT_KIP}
+        component={EditShiftKipScreen}
+        options={({ navigation }: any) => CustomBackHeader(navigation, "Chỉnh sửa ca / kíp")}
       />
     </Stack.Navigator>
   );

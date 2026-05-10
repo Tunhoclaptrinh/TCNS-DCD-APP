@@ -141,6 +141,55 @@ class DutyServiceClass {
     return res.data ?? res;
   }
 
+  /**
+   * Cập nhật thông tin Ca trực (shift) — chỉ admin/staff.
+   * PUT /duty/shifts/:id
+   */
+  async updateShift(shiftId: number, payload: {
+    name?: string;
+    startTime?: string;
+    endTime?: string;
+    note?: string;
+    status?: string;
+  }): Promise<any> {
+    const res: any = await apiClient.put(
+      ENDPOINTS.DUTY.UPDATE_SHIFT(shiftId),
+      payload
+    );
+    return res.data ?? res;
+  }
+
+  /**
+   * Cập nhật thông tin Kíp trực — chỉ admin/staff.
+   * PUT /duty/kips/:id
+   */
+  async updateKip(kipId: number, payload: {
+    name?: string;
+    startTime?: string;
+    endTime?: string;
+    capacity?: number;
+    coefficient?: number;
+    note?: string;
+    status?: string;
+  }): Promise<any> {
+    const res: any = await apiClient.put(
+      ENDPOINTS.DUTY.UPDATE_KIP(kipId),
+      payload
+    );
+    return res.data ?? res;
+  }
+
+  /**
+   * Xóa kíp trực — chỉ admin/staff.
+   * DELETE /duty/kips/:id
+   */
+  async deleteKip(kipId: number): Promise<any> {
+    const res: any = await apiClient.delete(
+      ENDPOINTS.DUTY.DELETE_KIP(kipId)
+    );
+    return res.data ?? res;
+  }
+
   // ─── Helpers ───────────────────────────────────────────────────────────────
 
   /**

@@ -1,201 +1,478 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity, Switch,
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/src/styles/colors";
 import { useTheme } from "@/src/hooks/useTheme";
+import { useAuth } from "@/src/hooks/useAuth";
+import { DutyService, DutySlot, DutyShift } from "@/src/services/duty.service";
+import { ROUTE_NAMES } from "@/src/config/routes.config";
 
-const SHIFTS = [
-  { id: "morning", label: "Ca sáng", time: "7:00 - 11:00" },
-  { id: "afternoon", label: "Ca chiều", time: "13:00 - 17:00" },
-  { id: "evening", label: "Ca tối", time: "18:00 - 22:00" },
-];
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const DAYS = [
-  { id: "mon", label: "Thứ 2", date: "05/05" },
-  { id: "tue", label: "Thứ 3", date: "06/05" },
-  { id: "wed", label: "Thứ 4", date: "07/05" },
-  { id: "thu", label: "Thứ 5", date: "08/05" },
-  { id: "fri", label: "Thứ 6", date: "09/05" },
-  { id: "sat", label: "Thứ 7", date: "10/05" },
-  { id: "sun", label: "CN", date: "11/05" },
-];
+const DAY_LABELS: Record<number, string> = { 0: "CN", 1: "T2", 2: "T3", 3: "T4", 4: "T5", 5: "T6", 6: "T7" };
 
-const RegisterDutyScreen = ({ navigation }: any) => {
+const formatDate = (isoStr: string) => {
+  const d = new Date(isoStr.substring(0, 10));
+  return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+};
+
+const getDayLabel = (isoStr: string) => {
+  const d = new Date(isoStr.substring(0, 10));
+  return DAY_LABELS[d.getDay()] ?? "";
+};
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+interface ShiftGroup {
+  shift: DutyShift;
+  slots: DutySlot[];
+}
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+const RegisterDutyScreen = ({ navigation, route }: any) => {
   const { colors, isDark } = useTheme();
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [isLeader, setIsLeader] = useState(false);
+  const { user } = useAuth();
 
-  const toggleSlot = (dayId: string, shiftId: string) => {
-    const key = `${dayId}-${shiftId}`;
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+  const initWeekStart = route?.params?.weekStart ?? DutyService.getWeekStartDate();
+  const [weekStart, setWeekStart] = useState(initWeekStart);
+  const [weekEnd, setWeekEnd] = useState("");
+  const [weekDays, setWeekDays] = useState(DutyService.getWeekDays(initWeekStart));
+
+  const [shiftGroups, setShiftGroups] = useState<ShiftGroup[]>([]);
+  const [allSlots, setAllSlots] = useState<DutySlot[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [registering, setRegistering] = useState<number | null>(null); // slotId đang xử lý
+
+  const myUserId: number | undefined = user?.id !== undefined ? Number(user.id) : undefined;
+  const userRole = (user as any)?.role;
+  const isAdmin = userRole === "admin" || userRole === "staff";
+
+  // ── Fetch ──────────────────────────────────────────────────────────────────
+  const fetchData = useCallback(async (ws: string, isRefresh = false) => {
+    if (isRefresh) setRefreshing(true);
+    else setLoading(true);
+    setError(null);
+    try {
+      const result = await DutyService.getWeeklySchedule(ws, myUserId);
+      setWeekEnd(result.weekEnd);
+      const slots: DutySlot[] = result.data?.slots ?? [];
+      const shifts: DutyShift[] = result.data?.templates ?? [];
+      setAllSlots(slots);
+
+      // Group slots theo shift
+      const grouped: ShiftGroup[] = shifts.map((shift) => ({
+        shift,
+        slots: slots.filter((s) => {
+          // slot có shiftId hoặc shiftDate khớp với shift.date
+          const slotDateStr = s.shiftDate?.substring(0, 10);
+          const shiftDateStr = shift.date?.substring(0, 10);
+          return slotDateStr === shiftDateStr;
+        }),
+      })).filter((g) => g.slots.length > 0);
+
+      setShiftGroups(grouped);
+    } catch (err: any) {
+      console.error("[RegisterDuty]", err);
+      setError(err?.message || "Không thể tải dữ liệu");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, [myUserId]);
+
+  useEffect(() => {
+    fetchData(weekStart);
+  }, [weekStart, fetchData]);
+
+  // ── Week nav ───────────────────────────────────────────────────────────────
+  const changeWeek = (delta: number) => {
+    const [y, m, d] = weekStart.split("-").map(Number);
+    const current = new Date(y, m - 1, d);
+    current.setDate(current.getDate() + delta * 7);
+    const yyyy = current.getFullYear();
+    const mm = String(current.getMonth() + 1).padStart(2, "0");
+    const dd = String(current.getDate()).padStart(2, "0");
+    const newWS = `${yyyy}-${mm}-${dd}`;
+    setWeekStart(newWS);
+    setWeekDays(DutyService.getWeekDays(newWS));
   };
 
-  const isSelected = (dayId: string, shiftId: string) =>
-    selected.has(`${dayId}-${shiftId}`);
+  // ── Actions ────────────────────────────────────────────────────────────────
+  const handleRegister = async (slot: DutySlot) => {
+    Alert.alert(
+      "Xác nhận đăng ký",
+      `Đăng ký kíp:\n${slot.shiftLabel}\n${getDayLabel(slot.shiftDate)} ${formatDate(slot.shiftDate)} · ${slot.startTime ?? ""} - ${slot.endTime ?? ""}`,
+      [
+        { text: "Hủy", style: "cancel" },
+        {
+          text: "Đăng ký",
+          onPress: async () => {
+            setRegistering(slot.id);
+            try {
+              await DutyService.registerToSlot(slot.id);
+              Alert.alert("✅ Thành công", "Đã đăng ký ca trực!");
+              fetchData(weekStart, true);
+            } catch (e: any) {
+              Alert.alert("Lỗi", e?.response?.data?.message ?? e?.message ?? "Đăng ký thất bại");
+            } finally {
+              setRegistering(null);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleCancel = async (slot: DutySlot) => {
+    Alert.alert(
+      "Hủy đăng ký",
+      `Bạn muốn hủy đăng ký kíp:\n${slot.shiftLabel}\n${getDayLabel(slot.shiftDate)} ${formatDate(slot.shiftDate)}?`,
+      [
+        { text: "Không", style: "cancel" },
+        {
+          text: "Hủy đăng ký",
+          style: "destructive",
+          onPress: async () => {
+            setRegistering(slot.id);
+            try {
+              await DutyService.cancelRegistration(slot.id);
+              Alert.alert("✅ Thành công", "Đã hủy đăng ký ca trực.");
+              fetchData(weekStart, true);
+            } catch (e: any) {
+              Alert.alert("Lỗi", e?.response?.data?.message ?? e?.message ?? "Hủy đăng ký thất bại");
+            } finally {
+              setRegistering(null);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  // ── Slot item helpers ──────────────────────────────────────────────────────
+  const isMySlot = (slot: DutySlot) =>
+    myUserId !== undefined && (slot.assignedUserIds ?? []).includes(myUserId);
+
+  const isFull = (slot: DutySlot) =>
+    (slot.assignedUserIds ?? []).length >= slot.capacity;
+
+  const getSlotStatus = (slot: DutySlot) => {
+    if (isMySlot(slot)) return "registered";
+    if (slot.status === "locked") return "locked";
+    if (isFull(slot)) return "full";
+    return "open";
+  };
+
+  const STATUS_CONFIG = {
+    registered: { label: "Đã đăng ký", color: COLORS.SUCCESS, bg: isDark ? "#1a3a1a" : "#E8F5E9", icon: "checkmark-circle" as const },
+    locked: { label: "Đã khóa", color: COLORS.GRAY, bg: isDark ? "#2a2a2a" : "#F5F5F5", icon: "lock-closed" as const },
+    full: { label: "Đã đầy", color: COLORS.WARNING, bg: isDark ? "#3a2a1a" : "#FFF3E0", icon: "people" as const },
+    open: { label: "Còn chỗ", color: "#1976D2", bg: isDark ? "#1a2a3a" : "#E3F2FD", icon: "add-circle" as const },
+  };
+
+  // ── Render ─────────────────────────────────────────────────────────────────
+  const formatWeekLabel = () => {
+    if (!weekEnd) return weekStart;
+    const s = new Date(weekStart).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+    const e = new Date(weekEnd).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
+    return `${s} - ${e}`;
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        {/* Info Card */}
-        <View style={[styles.infoCard, { backgroundColor: isDark ? "#1a2a3a" : "#EBF5FF" }]}>
-          <Ionicons name="information-circle-outline" size={20} color="#1976D2" />
-          <Text style={[styles.infoText, { color: isDark ? "#64B5F6" : "#1565C0" }]}>
-            Bấm vào ô để chọn ca trực. Bấm lại để bỏ chọn. Sau khi gửi, chuyên viên sẽ xác nhận.
-          </Text>
+      {/* ── Week Header ── */}
+      <View style={[styles.weekHeader, { backgroundColor: colors.CARD_BG, borderBottomColor: colors.BORDER }]}>
+        <View style={styles.weekRow}>
+          <TouchableOpacity style={[styles.navBtn, { backgroundColor: colors.BORDER }]} onPress={() => changeWeek(-1)}>
+            <Ionicons name="chevron-back" size={18} color={colors.TEXT_PRIMARY} />
+          </TouchableOpacity>
+          <View style={styles.weekInfo}>
+            <Text style={[styles.weekTitle, { color: colors.TEXT_PRIMARY }]}>{formatWeekLabel()}</Text>
+            <Text style={[styles.weekSub, { color: colors.TEXT_SECONDARY }]}>
+              {allSlots.filter((s) => isMySlot(s)).length} ca đã đăng ký · {allSlots.length} ca tổng
+            </Text>
+          </View>
+          <TouchableOpacity style={[styles.navBtn, { backgroundColor: colors.BORDER }]} onPress={() => changeWeek(1)}>
+            <Ionicons name="chevron-forward" size={18} color={colors.TEXT_PRIMARY} />
+          </TouchableOpacity>
         </View>
 
-        {/* Week Label */}
-        <Text style={[styles.weekLabel, { color: colors.TEXT_PRIMARY }]}>Tuần 19/2026 (05/05 - 11/05)</Text>
-
-        {/* Grid Table */}
-        <View style={[styles.tableContainer, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-          {/* Header Row */}
-          <View style={[styles.headerRow, { borderBottomColor: colors.BORDER }]}>
-            <View style={[styles.shiftCol, { borderRightColor: colors.BORDER }]}>
-              <Text style={[styles.headerText, { color: colors.TEXT_SECONDARY }]}>Ca / Ngày</Text>
-            </View>
-            {DAYS.map((day) => (
-              <View key={day.id} style={[styles.dayCol, { borderRightColor: colors.BORDER }]}>
-                <Text style={[styles.dayLabel, { color: colors.TEXT_PRIMARY }]}>{day.label}</Text>
-                <Text style={[styles.dayDate, { color: colors.TEXT_SECONDARY }]}>{day.date}</Text>
+        {/* Day chips */}
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dayRow}>
+          {weekDays.map((day, i) => {
+            const hasMySlot = allSlots.some((s) => {
+              const slotDate = s.shiftDate?.substring(0, 10);
+              const dayDate = `${day.date.getFullYear()}-${String(day.date.getMonth() + 1).padStart(2, "0")}-${String(day.date.getDate()).padStart(2, "0")}`;
+              return slotDate === dayDate && isMySlot(s);
+            });
+            return (
+              <View key={i} style={styles.dayChip}>
+                <Text style={[styles.dayLabel, { color: colors.TEXT_SECONDARY }]}>{day.label}</Text>
+                <Text style={[styles.dayDate, { color: colors.TEXT_PRIMARY }]}>{day.dateStr}</Text>
+                {hasMySlot && <View style={[styles.dot, { backgroundColor: COLORS.SUCCESS }]} />}
               </View>
-            ))}
+            );
+          })}
+        </ScrollView>
+      </View>
+
+      {/* ── Content ── */}
+      {loading ? (
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+          <Text style={[styles.hint, { color: colors.TEXT_SECONDARY }]}>Đang tải lịch trực...</Text>
+        </View>
+      ) : error ? (
+        <View style={styles.centered}>
+          <Ionicons name="cloud-offline-outline" size={56} color={colors.BORDER} />
+          <Text style={[styles.errorText, { color: COLORS.ERROR }]}>{error}</Text>
+          <TouchableOpacity style={[styles.retryBtn, { backgroundColor: COLORS.PRIMARY }]} onPress={() => fetchData(weekStart)}>
+            <Text style={styles.retryText}>Thử lại</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <ScrollView
+          contentContainerStyle={styles.content}
+          refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={() => fetchData(weekStart, true)} colors={[COLORS.PRIMARY]} tintColor={COLORS.PRIMARY} />
+          }
+        >
+          {/* Info banner */}
+          <View style={[styles.infoBanner, { backgroundColor: isDark ? "#1a2a3a" : "#EBF5FF" }]}>
+            <Ionicons name="information-circle-outline" size={18} color="#1976D2" />
+            <Text style={[styles.infoText, { color: isDark ? "#64B5F6" : "#1565C0" }]}>
+              Chọn kíp trực muốn đăng ký. Mỗi kíp hiển thị số chỗ còn lại.
+            </Text>
           </View>
 
-          {/* Shift Rows */}
-          {SHIFTS.map((shift) => (
-            <View key={shift.id} style={[styles.shiftRow, { borderBottomColor: colors.BORDER }]}>
-              <View style={[styles.shiftCol, { borderRightColor: colors.BORDER }]}>
-                <Text style={[styles.shiftLabel, { color: colors.TEXT_PRIMARY }]}>{shift.label}</Text>
-                <Text style={[styles.shiftTime, { color: colors.TEXT_SECONDARY }]}>{shift.time}</Text>
-              </View>
-              {DAYS.map((day) => {
-                const sel = isSelected(day.id, shift.id);
-                return (
+          {shiftGroups.length === 0 && (
+            <View style={styles.emptyBox}>
+              <Ionicons name="calendar-outline" size={56} color={colors.BORDER} />
+              <Text style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}>Không có ca trực nào trong tuần này</Text>
+            </View>
+          )}
+
+          {shiftGroups.map(({ shift, slots }) => (
+            <View key={shift.id} style={styles.shiftBlock}>
+              {/* Shift Header */}
+              <View style={[styles.shiftHeader, { backgroundColor: COLORS.PRIMARY }]}>
+                <View style={styles.shiftHeaderLeft}>
+                  <Text style={styles.shiftName}>{shift.name}</Text>
+                  <Text style={styles.shiftTime}>
+                    {getDayLabel(shift.date)} {formatDate(shift.date)}
+                    {shift.startTime ? ` · ${shift.startTime} - ${shift.endTime}` : ""}
+                  </Text>
+                </View>
+                {isAdmin && (
                   <TouchableOpacity
-                    key={day.id}
-                    style={[
-                      styles.cell,
-                      { borderRightColor: colors.BORDER },
-                      sel && { backgroundColor: COLORS.PRIMARY },
-                    ]}
-                    onPress={() => toggleSlot(day.id, shift.id)}
+                    style={styles.editShiftBtn}
+                    onPress={() => navigation.navigate(ROUTE_NAMES.DUTY.EDIT_SHIFT_KIP, {
+                      shiftId: shift.id,
+                      weekStart,
+                    })}
                   >
-                    {sel && <Ionicons name="checkmark" size={18} color={COLORS.WHITE} />}
+                    <Ionicons name="create-outline" size={18} color={COLORS.WHITE} />
                   </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Kips/Slots */}
+              {slots.map((slot) => {
+                const status = getSlotStatus(slot);
+                const cfg = STATUS_CONFIG[status];
+                const isProcessing = registering === slot.id;
+                const assigned = slot.assignedUserIds?.length ?? 0;
+
+                return (
+                  <View
+                    key={slot.id}
+                    style={[styles.slotRow, { backgroundColor: colors.CARD_BG, borderColor: isMySlot(slot) ? COLORS.PRIMARY : colors.BORDER }]}
+                  >
+                    {/* Kip info */}
+                    <View style={styles.slotInfo}>
+                      <View style={styles.slotTitleRow}>
+                        <Text style={[styles.slotName, { color: colors.TEXT_PRIMARY }]} numberOfLines={1}>
+                          {slot.shiftLabel}
+                        </Text>
+                        {isAdmin && (
+                          <TouchableOpacity
+                            style={styles.editKipBtn}
+                            onPress={() => navigation.navigate(ROUTE_NAMES.DUTY.EDIT_SHIFT_KIP, {
+                              shiftId: shift.id,
+                              kipId: slot.kipId,
+                              weekStart,
+                            })}
+                          >
+                            <Ionicons name="create-outline" size={14} color={COLORS.PRIMARY} />
+                          </TouchableOpacity>
+                        )}
+                      </View>
+
+                      <View style={styles.slotMeta}>
+                        {slot.startTime && (
+                          <View style={styles.metaChip}>
+                            <Ionicons name="time-outline" size={12} color={colors.TEXT_SECONDARY} />
+                            <Text style={[styles.metaText, { color: colors.TEXT_SECONDARY }]}>
+                              {slot.startTime} - {slot.endTime}
+                            </Text>
+                          </View>
+                        )}
+                        <View style={styles.metaChip}>
+                          <Ionicons name="people-outline" size={12} color={colors.TEXT_SECONDARY} />
+                          <Text style={[styles.metaText, { color: colors.TEXT_SECONDARY }]}>
+                            {assigned}/{slot.capacity}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Capacity bar */}
+                      <View style={[styles.capacityBar, { backgroundColor: colors.BORDER }]}>
+                        <View
+                          style={[
+                            styles.capacityFill,
+                            {
+                              width: `${Math.min((assigned / slot.capacity) * 100, 100)}%` as any,
+                              backgroundColor: assigned >= slot.capacity ? COLORS.ERROR : COLORS.PRIMARY,
+                            },
+                          ]}
+                        />
+                      </View>
+                    </View>
+
+                    {/* Status badge + action button */}
+                    <View style={styles.slotAction}>
+                      <View style={[styles.statusBadge, { backgroundColor: cfg.bg }]}>
+                        <Ionicons name={cfg.icon} size={12} color={cfg.color} />
+                        <Text style={[styles.statusText, { color: cfg.color }]}>{cfg.label}</Text>
+                      </View>
+
+                      {isProcessing ? (
+                        <ActivityIndicator size="small" color={COLORS.PRIMARY} style={{ marginTop: 8 }} />
+                      ) : status === "registered" ? (
+                        <TouchableOpacity
+                          style={[styles.actionBtn, { backgroundColor: isDark ? "#3a1a1a" : "#FFEBEE", borderColor: COLORS.ERROR }]}
+                          onPress={() => handleCancel(slot)}
+                        >
+                          <Ionicons name="close" size={14} color={COLORS.ERROR} />
+                          <Text style={[styles.actionBtnText, { color: COLORS.ERROR }]}>Hủy</Text>
+                        </TouchableOpacity>
+                      ) : status === "open" ? (
+                        <TouchableOpacity
+                          style={[styles.actionBtn, { backgroundColor: COLORS.PRIMARY }]}
+                          onPress={() => handleRegister(slot)}
+                        >
+                          <Ionicons name="add" size={14} color={COLORS.WHITE} />
+                          <Text style={[styles.actionBtnText, { color: COLORS.WHITE }]}>Đăng ký</Text>
+                        </TouchableOpacity>
+                      ) : null}
+                    </View>
+                  </View>
                 );
               })}
             </View>
           ))}
-        </View>
 
-        {/* Leader toggle */}
-        <View style={[styles.leaderRow, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-          <View>
-            <Text style={[styles.leaderTitle, { color: colors.TEXT_PRIMARY }]}>Đăng ký làm kíp trưởng</Text>
-            <Text style={[styles.leaderDesc, { color: colors.TEXT_SECONDARY }]}>Kíp trưởng sẽ có quyền quản lý điểm danh</Text>
-          </View>
-          <Switch
-            value={isLeader}
-            onValueChange={setIsLeader}
-            trackColor={{ false: colors.BORDER, true: COLORS.PRIMARY }}
-            thumbColor={isLeader ? COLORS.WHITE : "#f4f3f4"}
-          />
-        </View>
-
-        {/* Summary */}
-        <View style={[styles.summaryBox, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-          <Text style={[styles.summaryTitle, { color: colors.TEXT_PRIMARY }]}>Đã chọn {selected.size} ca trực</Text>
-          {Array.from(selected).map((key) => {
-            const [dayId, shiftId] = key.split("-");
-            const day = DAYS.find((d) => d.id === dayId);
-            const shift = SHIFTS.find((s) => s.id === shiftId);
-            return (
-              <View key={key} style={styles.summaryItem}>
-                <Ionicons name="time-outline" size={14} color={COLORS.PRIMARY} />
-                <Text style={[styles.summaryItemText, { color: colors.TEXT_SECONDARY }]}>
-                  {day?.label} {day?.date} - {shift?.label} ({shift?.time})
-                </Text>
-              </View>
-            );
-          })}
-        </View>
-
-        {/* Submit */}
-        <TouchableOpacity
-          style={[styles.submitBtn, { backgroundColor: selected.size > 0 ? COLORS.PRIMARY : colors.BORDER }]}
-          disabled={selected.size === 0}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={[styles.submitBtnText, { color: selected.size > 0 ? COLORS.WHITE : colors.TEXT_SECONDARY }]}>
-            Gửi đăng ký ({selected.size} ca)
-          </Text>
-        </TouchableOpacity>
-
-        <View style={{ height: 40 }} />
-      </ScrollView>
+          <View style={{ height: 60 }} />
+        </ScrollView>
+      )}
     </View>
   );
 };
 
+// ─── Styles ───────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 24 },
+  hint: { fontSize: 14 },
+  errorText: { fontSize: 14, textAlign: "center" },
+  retryBtn: { paddingHorizontal: 24, paddingVertical: 12, borderRadius: 12 },
+  retryText: { color: COLORS.WHITE, fontWeight: "700" },
+
+  // Week Header
+  weekHeader: { borderBottomWidth: 1 },
+  weekRow: { flexDirection: "row", alignItems: "center", paddingHorizontal: 16, paddingVertical: 12, gap: 12 },
+  navBtn: { width: 34, height: 34, borderRadius: 17, justifyContent: "center", alignItems: "center" },
+  weekInfo: { flex: 1, alignItems: "center" },
+  weekTitle: { fontSize: 16, fontWeight: "700" },
+  weekSub: { fontSize: 12, marginTop: 2 },
+  dayRow: { flexDirection: "row", paddingHorizontal: 16, paddingBottom: 10, gap: 12 },
+  dayChip: { alignItems: "center", gap: 2 },
+  dayLabel: { fontSize: 11, fontWeight: "600" },
+  dayDate: { fontSize: 12, fontWeight: "700" },
+  dot: { width: 5, height: 5, borderRadius: 2.5 },
+
+  // Content
   content: { padding: 16 },
-  infoCard: {
-    flexDirection: "row", gap: 10, padding: 14,
-    borderRadius: 12, marginBottom: 16, alignItems: "flex-start",
+  infoBanner: {
+    flexDirection: "row", gap: 10, padding: 12, borderRadius: 12,
+    marginBottom: 16, alignItems: "flex-start",
   },
   infoText: { flex: 1, fontSize: 13, lineHeight: 20 },
-  weekLabel: { fontSize: 16, fontWeight: "700", marginBottom: 12 },
-  tableContainer: {
-    borderRadius: 14, borderWidth: 1, overflow: "hidden", marginBottom: 16,
+  emptyBox: { alignItems: "center", marginTop: 60, gap: 12 },
+  emptyText: { fontSize: 15 },
+
+  // Shift block
+  shiftBlock: { marginBottom: 20 },
+  shiftHeader: {
+    flexDirection: "row", alignItems: "center", justifyContent: "space-between",
+    paddingHorizontal: 16, paddingVertical: 12, borderRadius: 14,
+    marginBottom: 8,
   },
-  headerRow: {
-    flexDirection: "row", borderBottomWidth: 1,
+  shiftHeaderLeft: { flex: 1 },
+  shiftName: { color: COLORS.WHITE, fontSize: 15, fontWeight: "800" },
+  shiftTime: { color: "rgba(255,255,255,0.85)", fontSize: 12, marginTop: 2 },
+  editShiftBtn: {
+    width: 32, height: 32, borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    justifyContent: "center", alignItems: "center",
   },
-  shiftRow: {
-    flexDirection: "row", borderBottomWidth: 1,
+
+  // Slot row
+  slotRow: {
+    flexDirection: "row", alignItems: "center", gap: 12,
+    padding: 14, borderRadius: 14, borderWidth: 1.5,
+    marginBottom: 10,
+    shadowColor: "#000", shadowOffset: { width: 0, height: 1 }, shadowOpacity: 0.04, shadowRadius: 3, elevation: 1,
   },
-  shiftCol: {
-    width: 88, padding: 10, borderRightWidth: 1, justifyContent: "center",
+  slotInfo: { flex: 1 },
+  slotTitleRow: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 6 },
+  slotName: { fontSize: 14, fontWeight: "700", flex: 1 },
+  editKipBtn: {
+    width: 24, height: 24, borderRadius: 12,
+    justifyContent: "center", alignItems: "center",
   },
-  headerText: { fontSize: 11, fontWeight: "600" },
-  dayCol: {
-    flex: 1, padding: 8, alignItems: "center", borderRightWidth: 1,
+  slotMeta: { flexDirection: "row", gap: 10, marginBottom: 8 },
+  metaChip: { flexDirection: "row", alignItems: "center", gap: 3 },
+  metaText: { fontSize: 12 },
+  capacityBar: { height: 4, borderRadius: 2, overflow: "hidden" },
+  capacityFill: { height: 4, borderRadius: 2 },
+
+  // Action
+  slotAction: { alignItems: "center", gap: 8, minWidth: 80 },
+  statusBadge: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    paddingHorizontal: 8, paddingVertical: 4, borderRadius: 20,
   },
-  dayLabel: { fontSize: 11, fontWeight: "700" },
-  dayDate: { fontSize: 10 },
-  shiftLabel: { fontSize: 11, fontWeight: "700" },
-  shiftTime: { fontSize: 10, marginTop: 2 },
-  cell: {
-    flex: 1, height: 52, alignItems: "center", justifyContent: "center",
-    borderRightWidth: 1,
+  statusText: { fontSize: 11, fontWeight: "600" },
+  actionBtn: {
+    flexDirection: "row", alignItems: "center", gap: 4,
+    paddingHorizontal: 12, paddingVertical: 7, borderRadius: 10,
+    borderWidth: 1, borderColor: "transparent",
   },
-  leaderRow: {
-    flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-    padding: 16, borderRadius: 14, borderWidth: 1, marginBottom: 14,
-  },
-  leaderTitle: { fontSize: 15, fontWeight: "600", marginBottom: 2 },
-  leaderDesc: { fontSize: 12 },
-  summaryBox: {
-    padding: 16, borderRadius: 14, borderWidth: 1, marginBottom: 16, gap: 8,
-  },
-  summaryTitle: { fontSize: 15, fontWeight: "700", marginBottom: 4 },
-  summaryItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-  summaryItemText: { fontSize: 13 },
-  submitBtn: {
-    paddingVertical: 16, borderRadius: 14, alignItems: "center",
-    shadowColor: COLORS.PRIMARY, shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3, shadowRadius: 8, elevation: 4,
-  },
-  submitBtnText: { fontSize: 16, fontWeight: "700" },
+  actionBtnText: { fontSize: 13, fontWeight: "700" },
 });
 
 export default RegisterDutyScreen;

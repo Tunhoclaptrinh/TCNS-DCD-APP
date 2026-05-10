@@ -59,5 +59,10 @@ export const ENDPOINTS = {
     SELF_CHECK_IN: (id: number | string) => `/duty/slots/${id}/check-in`,
     MARK_ATTENDANCE: (id: number | string) => `/duty/slots/${id}/attendance`,
     STATS: "/duty/stats/summary",
+    // Shift management (duty:manage)
+    UPDATE_SHIFT: (id: number | string) => `/duty/shifts/${id}`,
+    // Kip management (duty:manage)
+    UPDATE_KIP: (id: number | string) => `/duty/kips/${id}`,
+    DELETE_KIP: (id: number | string) => `/duty/kips/${id}`,
   },
 };
