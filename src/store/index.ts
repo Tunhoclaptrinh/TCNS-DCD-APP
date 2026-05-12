@@ -3,6 +3,7 @@ import { useDispatch, useSelector, TypedUseSelectorHook } from "react-redux";
 import authReducer from "./slices/authSlice";
 import notificationReducer from "./slices/notificationSlice";
 import settingsReducer from "./slices/settingsSlice";
+import reportReducer from "./slices/reportSlice";
 
 // Initially syncing core slices. Add more as needed.
 export const store = configureStore({
@@ -10,6 +11,7 @@ export const store = configureStore({
     auth: authReducer,
     notifications: notificationReducer,
     settings: settingsReducer,
+    report: reportReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({

@@ -57,7 +57,7 @@ const RegisterDutyScreen = ({ navigation, route }: any) => {
 
   const myUserId: number | undefined = user?.id !== undefined ? Number(user.id) : undefined;
   const userRole = (user as any)?.role;
-  const isAdmin = userRole === "admin" || userRole === "staff";
+  const isAdmin = true; // Bỏ phân quyền: userRole === "admin" || userRole === "staff";
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const fetchData = useCallback(async (ws: string, isRefresh = false) => {

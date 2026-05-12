@@ -19,9 +19,42 @@ export const fetchNotifications = createAsyncThunk(
   "notifications/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await NotificationService.getNotifications({ limit: 50 });
-      console.log("NOTIFICATIONS RESPONSE:", JSON.stringify(response.data, null, 2));
-      return response.data;
+      const response: any = await NotificationService.getNotifications({ limit: 50 });
+      
+      // Khai phá an toàn array items
+      let rawArray: any[] = [];
+      let unreadCount = 0;
+
+      if (Array.isArray(response)) {
+        rawArray = response;
+      } else if (response && typeof response === 'object') {
+        if (Array.isArray(response.data)) {
+          rawArray = response.data;
+        } else if (response.data && Array.isArray(response.data.data)) {
+          rawArray = response.data.data;
+        } else if (response.data && Array.isArray(response.data.items)) {
+          rawArray = response.data.items;
+        } else if (Array.isArray(response.items)) {
+          rawArray = response.items;
+        }
+        
+        unreadCount = response.unreadCount ?? response.data?.unreadCount ?? 0;
+      }
+
+      // Map chuẩn format Frontend tránh thiếu trường
+      const items = rawArray.map((item: any) => ({
+        id: item.id || item._id,
+        userId: item.userId || item.user_id,
+        title: item.title || "Thông báo",
+        message: item.message || "",
+        type: item.type || "system",
+        category: item.category,
+        refId: item.refId,
+        isRead: item.isRead ?? item.is_read ?? false,
+        createdAt: item.createdAt || new Date().toISOString(),
+      }));
+
+      return { items, unreadCount };
     } catch (error: any) {
       console.error("NOTIFICATIONS ERROR:", error);
       return rejectWithValue(error.message);
@@ -98,9 +131,10 @@ const notificationSlice = createSlice({
       })
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload;
-        // Calculate unread count from items for consistency or fetch separately
-        state.unreadCount = action.payload.filter(item => !item.isRead).length; 
+        state.items = action.payload.items || [];
+        state.unreadCount = action.payload.unreadCount !== undefined && action.payload.unreadCount !== null 
+          ? action.payload.unreadCount 
+          : state.items.filter(item => !item.isRead).length; 
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;

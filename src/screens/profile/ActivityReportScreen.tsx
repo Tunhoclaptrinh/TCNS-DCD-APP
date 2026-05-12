@@ -1,39 +1,73 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
+  View, Text, StyleSheet, ScrollView, TouchableOpacity, ActivityIndicator, RefreshControl
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/src/styles/colors";
 import { useTheme } from "@/src/hooks/useTheme";
-
-const STATS = [
-  { label: "Tổng ca trực", value: "42", sub: "ca", icon: "calendar", color: "#1976D2", bg: "#E3F2FD" },
-  { label: "Ca vắng", value: "3", sub: "ca", icon: "close-circle", color: COLORS.ERROR, bg: "#FFEBEE" },
-  { label: "Tiền phạt", value: "150.000", sub: "đ", icon: "cash", color: COLORS.WARNING, bg: "#FFF8E1" },
-  { label: "Điểm RLN", value: "88", sub: "điểm", icon: "star", color: COLORS.SUCCESS, bg: "#E8F5E9" },
-];
-
-const MONTHLY_SUMMARY = [
-  { month: "Tháng 4/2026", shifts: 10, absent: 0, fine: 0 },
-  { month: "Tháng 3/2026", shifts: 12, absent: 1, fine: 50000 },
-  { month: "Tháng 2/2026", shifts: 8, absent: 2, fine: 100000 },
-  { month: "Tháng 1/2026", shifts: 12, absent: 0, fine: 0 },
-];
+import { useAppDispatch, useAppSelector } from "@/src/store";
+import { fetchOverview } from "@/src/store/slices/reportSlice";
 
 const ActivityReportScreen = ({ navigation }: any) => {
   const { colors, isDark } = useTheme();
+  const dispatch = useAppDispatch();
+  const { overview, loading, error } = useAppSelector(state => state.report);
+
+  useEffect(() => {
+    dispatch(fetchOverview());
+  }, [dispatch]);
+
+  const onRefresh = () => {
+    dispatch(fetchOverview());
+  };
 
   const formatCurrency = (amount: number) =>
-    amount === 0 ? "Không" : amount.toLocaleString("vi-VN") + " đ";
+    amount === 0 ? "0" : amount.toLocaleString("vi-VN") + " đ";
+
+  if (loading && !overview) {
+    return (
+      <View style={[styles.container, styles.centerBox, { backgroundColor: colors.BACKGROUND }]}>
+        <ActivityIndicator size="large" color={COLORS.PRIMARY} />
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, styles.centerBox, { backgroundColor: colors.BACKGROUND }]}>
+        <Text style={{ color: COLORS.ERROR }}>Lỗi tải báo cáo: {error}</Text>
+        <TouchableOpacity style={{ marginTop: 16 }} onPress={() => dispatch(fetchOverview())}>
+          <Text style={{ color: COLORS.PRIMARY }}>Thử lại</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Map BE data to Stats
+  const stats = [
+    { label: "Tổng số User", value: overview?.users?.totalUsers || 0, sub: "người", icon: "people", color: "#1976D2", bg: "#E3F2FD" },
+    { label: "Đang hoạt động", value: overview?.users?.activeUsers || 0, sub: "người", icon: "checkmark-circle", color: COLORS.SUCCESS, bg: "#E8F5E9" },
+    { label: "Tổng ca trực", value: overview?.duty?.totalSlots || 0, sub: "ca", icon: "calendar", color: COLORS.PRIMARY, bg: "#FFEBEE" },
+    { label: "Tỉ lệ phủ", value: overview?.duty?.coverageRate || 0, sub: "%", icon: "pie-chart", color: COLORS.WARNING, bg: "#FFF8E1" },
+    { label: "Yêu cầu đổi ca", value: overview?.duty?.pendingSwapRequests || 0, sub: "yêu cầu", icon: "swap-horizontal", color: "#8E24AA", bg: "#F3E5F5" },
+    { label: "Chưa đọc TB", value: overview?.notifications?.unreadNotifications || 0, sub: "thông báo", icon: "notifications", color: "#F57C00", bg: "#FFF3E0" },
+  ];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView 
+        contentContainerStyle={styles.content}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} colors={[COLORS.PRIMARY]} />}
+      >
+        <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, marginTop: 0 }]}>
+          Báo cáo tổng quan
+        </Text>
+        
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
-          {STATS.map((stat) => (
+          {stats.map((stat, idx) => (
             <View
-              key={stat.label}
+              key={idx}
               style={[styles.statCard, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}
             >
               <View style={[styles.statIconBox, { backgroundColor: isDark ? "#2a2a2a" : stat.bg }]}>
@@ -48,50 +82,21 @@ const ActivityReportScreen = ({ navigation }: any) => {
           ))}
         </View>
 
-        {/* Bar Chart placeholder */}
-        <View style={[styles.chartCard, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-          <Text style={[styles.chartTitle, { color: colors.TEXT_PRIMARY }]}>Ca trực theo tháng</Text>
-          <View style={styles.barChart}>
-            {MONTHLY_SUMMARY.map((m, idx) => (
-              <View key={idx} style={styles.barGroup}>
-                <View style={styles.barWrapper}>
-                  <View
-                    style={[
-                      styles.bar,
-                      { height: m.shifts * 6, backgroundColor: m.absent > 0 ? COLORS.WARNING : COLORS.PRIMARY },
-                    ]}
-                  />
-                </View>
-                <Text style={[styles.barLabel, { color: colors.TEXT_SECONDARY }]}>
-                  {m.month.replace("Tháng ", "T")}
-                </Text>
-              </View>
-            ))}
-          </View>
-        </View>
-
-        {/* Monthly Table */}
-        <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>Chi tiết theo tháng</Text>
+        {/* Finance Block */}
+        <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY }]}>Thu chi thưởng phạt</Text>
         <View style={[styles.tableCard, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-          <View style={[styles.tableHeader, { borderBottomColor: colors.BORDER }]}>
-            <Text style={[styles.tableHead, { color: colors.TEXT_SECONDARY, flex: 2 }]}>Tháng</Text>
-            <Text style={[styles.tableHead, { color: colors.TEXT_SECONDARY }]}>Ca trực</Text>
-            <Text style={[styles.tableHead, { color: colors.TEXT_SECONDARY }]}>Vắng</Text>
-            <Text style={[styles.tableHead, { color: colors.TEXT_SECONDARY }]}>Phạt</Text>
+          <View style={[styles.tableRow, { borderBottomColor: colors.BORDER }]}>
+            <Text style={[styles.tableCell, { color: colors.TEXT_PRIMARY, flex: 2, fontWeight: "600" }]}>Tổng thu (thưởng)</Text>
+            <Text style={[styles.tableCell, { color: COLORS.SUCCESS, fontWeight: "600" }]}>+{formatCurrency(overview?.finance?.totalReward || 0)}</Text>
           </View>
-          {MONTHLY_SUMMARY.map((m, idx) => (
-            <View
-              key={idx}
-              style={[styles.tableRow, { borderBottomColor: colors.BORDER }, idx === MONTHLY_SUMMARY.length - 1 && { borderBottomWidth: 0 }]}
-            >
-              <Text style={[styles.tableCell, { color: colors.TEXT_PRIMARY, flex: 2 }]}>{m.month}</Text>
-              <Text style={[styles.tableCell, { color: colors.TEXT_PRIMARY }]}>{m.shifts}</Text>
-              <Text style={[styles.tableCell, { color: m.absent > 0 ? COLORS.ERROR : COLORS.SUCCESS }]}>{m.absent}</Text>
-              <Text style={[styles.tableCell, { color: m.fine > 0 ? COLORS.WARNING : COLORS.SUCCESS }]}>
-                {formatCurrency(m.fine)}
-              </Text>
-            </View>
-          ))}
+          <View style={[styles.tableRow, { borderBottomColor: colors.BORDER }]}>
+            <Text style={[styles.tableCell, { color: colors.TEXT_PRIMARY, flex: 2, fontWeight: "600" }]}>Tổng chi (phạt)</Text>
+            <Text style={[styles.tableCell, { color: COLORS.ERROR, fontWeight: "600" }]}>-{formatCurrency(overview?.finance?.totalPenalty || 0)}</Text>
+          </View>
+          <View style={[styles.tableRow, { borderBottomWidth: 0 }]}>
+            <Text style={[styles.tableCell, { color: colors.TEXT_PRIMARY, flex: 2, fontWeight: "700" }]}>Số dư</Text>
+            <Text style={[styles.tableCell, { color: COLORS.PRIMARY, fontWeight: "700" }]}>{formatCurrency(overview?.finance?.netBalance || 0)}</Text>
+          </View>
         </View>
 
         <View style={{ height: 40 }} />
@@ -102,6 +107,7 @@ const ActivityReportScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  centerBox: { justifyContent: "center", alignItems: "center" },
   content: { padding: 16 },
   statsGrid: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 16 },
   statCard: {

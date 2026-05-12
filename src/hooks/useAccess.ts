@@ -13,16 +13,7 @@ export const useAccess = () => {
      */
     const hasPermissions = (requiredPermissions: string[] | string): boolean => {
         if (!isAuthenticated || !user) return false;
-
-        // Admin has all permissions
-        if (user.role === "admin") return true;
-
-        const permissions = user.permissions || [];
-        const required = Array.isArray(requiredPermissions)
-            ? requiredPermissions
-            : [requiredPermissions];
-
-        return required.every(p => permissions.includes(p));
+        return true; // Bỏ phân quyền, ai cũng có quyền
     };
 
     /**
@@ -30,10 +21,7 @@ export const useAccess = () => {
      */
     const hasAnyPermission = (requiredPermissions: string[]): boolean => {
         if (!isAuthenticated || !user) return false;
-        if (user.role === "admin") return true;
-
-        const permissions = user.permissions || [];
-        return requiredPermissions.some(p => permissions.includes(p));
+        return true; // Bỏ phân quyền, ai cũng có quyền
     };
 
     /**
@@ -41,8 +29,7 @@ export const useAccess = () => {
      */
     const hasRole = (role: string | string[]): boolean => {
         if (!isAuthenticated || !user) return false;
-        const roles = Array.isArray(role) ? role : [role];
-        return roles.includes(user.role);
+        return true; // Bỏ phân quyền, ai cũng có role
     };
 
     return {

@@ -82,7 +82,7 @@ const DutyScreen = ({ navigation }: any) => {
 
   // ── Derived Data ───────────────────────────────────────────────────────────
   const userRole = (user as any)?.role;
-  const isLeaderOrAdmin = userRole === "admin" || userRole === "staff";
+  const isLeaderOrAdmin = true; // Bỏ phân quyền: userRole === "admin" || userRole === "staff";
 
   const filteredSlots: DutySlot[] = (() => {
     if (!scheduleData?.slots) return [];
