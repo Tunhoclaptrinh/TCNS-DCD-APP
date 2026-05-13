@@ -128,7 +128,7 @@ const DutyStack = () => {
       <Stack.Screen
         name={ROUTE_NAMES.DUTY.EDIT_SHIFT_KIP}
         component={EditShiftKipScreen}
-        options={({ navigation }: any) => CustomBackHeader(navigation, "Chỉnh sửa ca / kíp")}
+        options={({ navigation }: any) => CustomBackHeader(navigation, "Chi tiết ca / kíp")}
       />
     </Stack.Navigator>
   );

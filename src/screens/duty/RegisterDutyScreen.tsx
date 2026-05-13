@@ -283,7 +283,7 @@ const RegisterDutyScreen = ({ navigation, route }: any) => {
                       weekStart,
                     })}
                   >
-                    <Ionicons name="create-outline" size={18} color={COLORS.WHITE} />
+                    <Ionicons name="information-circle-outline" size={18} color={COLORS.WHITE} />
                   </TouchableOpacity>
                 )}
               </View>
@@ -306,18 +306,7 @@ const RegisterDutyScreen = ({ navigation, route }: any) => {
                         <Text style={[styles.slotName, { color: colors.TEXT_PRIMARY }]} numberOfLines={1}>
                           {slot.shiftLabel}
                         </Text>
-                        {isAdmin && (
-                          <TouchableOpacity
-                            style={styles.editKipBtn}
-                            onPress={() => navigation.navigate(ROUTE_NAMES.DUTY.EDIT_SHIFT_KIP, {
-                              shiftId: shift.id,
-                              kipId: slot.kipId,
-                              weekStart,
-                            })}
-                          >
-                            <Ionicons name="create-outline" size={14} color={COLORS.PRIMARY} />
-                          </TouchableOpacity>
-                        )}
+
                       </View>
 
                       <View style={styles.slotMeta}>
