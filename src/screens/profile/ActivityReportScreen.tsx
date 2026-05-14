@@ -55,14 +55,14 @@ const ActivityReportScreen = ({ navigation }: any) => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={onRefresh} colors={[COLORS.PRIMARY]} />}
       >
         <Text style={[styles.sectionTitle, { color: colors.TEXT_PRIMARY, marginTop: 0 }]}>
           Báo cáo tổng quan
         </Text>
-        
+
         {/* Stats Grid */}
         <View style={styles.statsGrid}>
           {stats.map((stat, idx) => (

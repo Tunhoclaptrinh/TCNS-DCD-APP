@@ -71,16 +71,31 @@ const RegisterDutyScreen = ({ navigation, route }: any) => {
       const shifts: DutyShift[] = result.data?.templates ?? [];
       setAllSlots(slots);
 
-      // Group slots theo shift
+      // Group slots theo shift — dùng kipId để tránh trùng lặp khi 1 ngày có nhiều ca
       const grouped: ShiftGroup[] = shifts.map((shift) => ({
         shift,
         slots: slots.filter((s) => {
-          // slot có shiftId hoặc shiftDate khớp với shift.date
-          const slotDateStr = s.shiftDate?.substring(0, 10);
-          const shiftDateStr = shift.date?.substring(0, 10);
-          return slotDateStr === shiftDateStr;
+          // Ưu tiên 1: khớp shiftId trực tiếp
+          if (s.shiftId !== undefined && s.shiftId !== null) {
+            return Number(s.shiftId) === Number(shift.id);
+          }
+          // Ưu tiên 2: kiểm tra slot.kipId có thuộc shift.kips không
+          if (shift.kips && shift.kips.length > 0) {
+            return shift.kips.some((k) => Number(k.id) === Number(s.kipId));
+          }
+          // Fallback: match theo ngày (chỉ dùng khi không có kips data)
+          return s.shiftDate?.substring(0, 10) === shift.date?.substring(0, 10);
+        }).sort((a, b) => {
+          const timeA = a.startTime || "24:00";
+          const timeB = b.startTime || "24:00";
+          return timeA.localeCompare(timeB);
         }),
-      })).filter((g) => g.slots.length > 0);
+      })).filter((g) => g.slots.length > 0)
+      .sort((a, b) => {
+        const dateA = (a.shift.date || "9999-12-31").substring(0, 10);
+        const dateB = (b.shift.date || "9999-12-31").substring(0, 10);
+        return dateA.localeCompare(dateB);
+      });
 
       setShiftGroups(grouped);
     } catch (err: any) {
@@ -269,7 +284,9 @@ const RegisterDutyScreen = ({ navigation, route }: any) => {
               {/* Shift Header */}
               <View style={[styles.shiftHeader, { backgroundColor: COLORS.PRIMARY }]}>
                 <View style={styles.shiftHeaderLeft}>
-                  <Text style={styles.shiftName}>{shift.name}</Text>
+                  <Text style={styles.shiftName}>
+                    {shift.name?.toLowerCase().startsWith("ca ") ? shift.name : `Ca ${shift.name}`}
+                  </Text>
                   <Text style={styles.shiftTime}>
                     {getDayLabel(shift.date)} {formatDate(shift.date)}
                     {shift.startTime ? ` · ${shift.startTime} - ${shift.endTime}` : ""}

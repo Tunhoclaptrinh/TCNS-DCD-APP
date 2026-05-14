@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { ReportService, ReportOverview } from "../../services/report.service";
 
-interface ReportState {
+export interface ReportState {
   overview: ReportOverview | null;
   loading: boolean;
   error: string | null;

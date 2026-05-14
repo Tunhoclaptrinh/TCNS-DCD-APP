@@ -93,20 +93,32 @@ const DutyScreen = ({ navigation }: any) => {
       console.log("[DutyScreen] First slot shiftDate:", scheduleData.slots[0].shiftDate);
     }
 
-    if (selectedDayIdx === -1) return scheduleData.slots;
+    let slots = [...scheduleData.slots];
 
-    const targetDate = weekDays[selectedDayIdx]?.date;
-    if (!targetDate) return scheduleData.slots;
+    if (selectedDayIdx !== -1) {
+      const targetDate = weekDays[selectedDayIdx]?.date;
+      if (targetDate) {
+        // So sánh theo local date (tránh lệch múi giờ +7)
+        const targetStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
 
-    // So sánh theo local date (tránh lệch múi giờ +7)
-    const targetStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+        slots = slots.filter((s) => {
+          // shiftDate có thể là ISO string "2026-05-07T00:00:00.000Z" hoặc "2026-05-07"
+          // Lấy phần date (10 ký tự đầu) rồi so sánh
+          const slotDateRaw = s.shiftDate?.toString() ?? "";
+          const slotDateStr = slotDateRaw.substring(0, 10); // "YYYY-MM-DD"
+          return slotDateStr === targetStr;
+        });
+      }
+    }
 
-    return scheduleData.slots.filter((s) => {
-      // shiftDate có thể là ISO string "2026-05-07T00:00:00.000Z" hoặc "2026-05-07"
-      // Lấy phần date (10 ký tự đầu) rồi so sánh
-      const slotDateRaw = s.shiftDate?.toString() ?? "";
-      const slotDateStr = slotDateRaw.substring(0, 10); // "YYYY-MM-DD"
-      return slotDateStr === targetStr;
+    return slots.sort((a, b) => {
+      const dateA = (a.shiftDate?.toString() || "9999-12-31").substring(0, 10);
+      const dateB = (b.shiftDate?.toString() || "9999-12-31").substring(0, 10);
+      const timeA = a.startTime || "24:00";
+      const timeB = b.startTime || "24:00";
+      
+      if (dateA !== dateB) return dateA.localeCompare(dateB);
+      return timeA.localeCompare(timeB);
     });
   })();
 

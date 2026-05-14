@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -7,6 +7,7 @@ import {
   ScrollView,
   RefreshControl,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/src/styles/colors";
@@ -14,6 +15,8 @@ import { useAuth } from "@/src/hooks/useAuth";
 import { useTheme } from "@/src/hooks/useTheme";
 import { ROUTE_NAMES } from "@/src/config/routes.config";
 import { useTranslation } from "@/src/utils/i18n";
+import { useAppDispatch, useAppSelector } from "@/src/store";
+import { fetchOverview } from "@/src/store/slices/reportSlice";
 
 const HomeScreen = ({ navigation }: any) => {
   const { user } = useAuth();
@@ -21,11 +24,18 @@ const HomeScreen = ({ navigation }: any) => {
   const { t } = useTranslation();
   const [refreshing, setRefreshing] = useState(false);
 
+  const dispatch = useAppDispatch();
+  const { overview, loading } = useAppSelector((state) => state.report);
+
+  useEffect(() => {
+    dispatch(fetchOverview());
+  }, [dispatch]);
+
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    // Simulate data refresh
-    setTimeout(() => setRefreshing(false), 1000);
-  }, []);
+    await dispatch(fetchOverview());
+    setRefreshing(false);
+  }, [dispatch]);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
@@ -93,19 +103,37 @@ const HomeScreen = ({ navigation }: any) => {
           </Text>
         </View>
 
-        {/* Statistics Row - Synthetic from Web Dashboard */}
+        {/* Statistics Row - Live data from BE */}
         <View style={styles.statsContainer}>
           <View style={[styles.statItem, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-            <Text style={[styles.statValue, { color: colors.PRIMARY }]}>156</Text>
+            {loading && !overview ? (
+              <ActivityIndicator size="small" color={colors.PRIMARY} />
+            ) : (
+              <Text style={[styles.statValue, { color: colors.PRIMARY }]}>
+                {overview?.users?.totalUsers ?? 0}
+              </Text>
+            )}
             <Text style={[styles.statLabel, { color: colors.TEXT_SECONDARY }]}>Thành viên</Text>
           </View>
           <View style={[styles.statItem, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-            <Text style={[styles.statValue, { color: "#52c41a" }]}>12</Text>
+            {loading && !overview ? (
+              <ActivityIndicator size="small" color="#52c41a" />
+            ) : (
+              <Text style={[styles.statValue, { color: "#52c41a" }]}>
+                {overview?.duty?.totalAssigned ?? 0}
+              </Text>
+            )}
             <Text style={[styles.statLabel, { color: colors.TEXT_SECONDARY }]}>Đang trực</Text>
           </View>
           <View style={[styles.statItem, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-            <Text style={[styles.statValue, { color: "#1890ff" }]}>5</Text>
-            <Text style={[styles.statLabel, { color: colors.TEXT_SECONDARY }]}>Mới</Text>
+            {loading && !overview ? (
+              <ActivityIndicator size="small" color="#1890ff" />
+            ) : (
+              <Text style={[styles.statValue, { color: "#1890ff" }]}>
+                {overview?.users?.inactiveUsers ?? 0}
+              </Text>
+            )}
+            <Text style={[styles.statLabel, { color: colors.TEXT_SECONDARY }]}>Khác</Text>
           </View>
         </View>
 
