@@ -24,20 +24,6 @@ export const ENDPOINTS = {
     STATS: "/users/stats/summary",
   },
 
-  // Collections (User Content)
-  COLLECTIONS: {
-    BASE: "/collections",
-    GET_ONE: (id: number | string) => `/collections/${id}`,
-  },
-
-  // Favorites
-  FAVORITES: {
-    BASE: "/favorites",
-    GET_BY_TYPE: (type: string) => `/favorites/${type}`,
-    TOGGLE: (type: string, id: number | string) =>
-      `/favorites/${type}/${id}/toggle`,
-  },
-
   // Reviews/Comments
   REVIEWS: {
     BASE: "/reviews",

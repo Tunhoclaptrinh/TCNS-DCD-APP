@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-interface SettingsState {
+export interface SettingsState {
   theme: "light" | "dark";
   language: "vi" | "en";
   notificationsEnabled: boolean;

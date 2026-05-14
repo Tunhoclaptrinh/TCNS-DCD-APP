@@ -28,6 +28,7 @@ export type RouteParams = {
   // Main Stack - Profile
   ProfileScreen: undefined;
   EditProfile: undefined;
+  ChangePassword: undefined;
   ActivityReport: undefined;
   FinancialReport: undefined;
   Feedback: undefined;
@@ -39,7 +40,6 @@ export type RouteParams = {
   // Common
   Notifications: undefined;
   Settings: undefined;
-  FavoritesList: undefined;
   Support: undefined;
   TermsPrivacy: undefined;
   NotificationSettings: undefined;

@@ -2,8 +2,8 @@
  * Notification Service
  */
 
-import {apiClient} from "../config/api.client";
-import {BaseApiResponse} from "../types/api.types";
+import { apiClient } from "../config/api.client";
+import { BaseApiResponse } from "../types/api.types";
 
 export interface Notification {
   id: number;
@@ -24,7 +24,7 @@ class NotificationServiceClass {
    */
   async getUnreadCount(): Promise<number> {
     try {
-      const response = await apiClient.get<{unreadCount: number}>(`${this.baseEndpoint}`);
+      const response = await apiClient.get<{ unreadCount: number }>(`${this.baseEndpoint}`);
       return response.unreadCount || 0;
     } catch (error) {
       console.error("Error getting unread count:", error);
@@ -70,12 +70,12 @@ class NotificationServiceClass {
     isRead?: boolean;
   }): Promise<BaseApiResponse<Notification[]>> {
     const response = await apiClient.get<BaseApiResponse<Notification[]>>(this.baseEndpoint, params);
-    
+
     // Support the possibility of data wrapping based on typical interceptor configs
     if (response.data && Array.isArray((response.data as any).data)) {
-        return response.data as any;
+      return response.data as any;
     }
-    
+
     return response as unknown as BaseApiResponse<Notification[]>;
   }
 }

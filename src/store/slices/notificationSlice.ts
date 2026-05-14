@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { NotificationService, Notification } from "../../services/notification.service";
 
-interface NotificationState {
+export interface NotificationState {
   items: Notification[];
   unreadCount: number;
   loading: boolean;
@@ -20,7 +20,7 @@ export const fetchNotifications = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const response: any = await NotificationService.getNotifications({ limit: 50 });
-      
+
       // Khai phá an toàn array items
       let rawArray: any[] = [];
       let unreadCount = 0;
@@ -37,7 +37,7 @@ export const fetchNotifications = createAsyncThunk(
         } else if (Array.isArray(response.items)) {
           rawArray = response.items;
         }
-        
+
         unreadCount = response.unreadCount ?? response.data?.unreadCount ?? 0;
       }
 
@@ -132,9 +132,9 @@ const notificationSlice = createSlice({
       .addCase(fetchNotifications.fulfilled, (state, action) => {
         state.loading = false;
         state.items = action.payload.items || [];
-        state.unreadCount = action.payload.unreadCount !== undefined && action.payload.unreadCount !== null 
-          ? action.payload.unreadCount 
-          : state.items.filter(item => !item.isRead).length; 
+        state.unreadCount = action.payload.unreadCount !== undefined && action.payload.unreadCount !== null
+          ? action.payload.unreadCount
+          : state.items.filter(item => !item.isRead).length;
       })
       .addCase(fetchNotifications.rejected, (state, action) => {
         state.loading = false;
@@ -159,7 +159,7 @@ const notificationSlice = createSlice({
       .addCase(deleteNotification.fulfilled, (state, action) => {
         const item = state.items.find(i => i.id === action.payload);
         if (item && !item.isRead) {
-             state.unreadCount = Math.max(0, state.unreadCount - 1);
+          state.unreadCount = Math.max(0, state.unreadCount - 1);
         }
         state.items = state.items.filter((i) => i.id !== action.payload);
       })

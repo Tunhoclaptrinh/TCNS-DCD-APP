@@ -41,15 +41,11 @@ export const NavigationService = {
   // Home flow
   toHome: () => navigate("HomeScreen"),
 
-  // Search flow
-  toSearch: () => navigate("DiscoveryScreen"),
-
   // Profile flow
   toProfile: () => navigate("ProfileScreen"),
   toEditProfile: () => navigate("EditProfile"),
-  toChangePassword: () => navigate("Settings"), // Assuming change password is in Settings now or keep if exists
-  toFavoritesList: () => navigate("FavoritesList"), // Kept but generic
-  toNotificationSettings: () => navigate("Notifications"), // Or specific settings
+  toChangePassword: () => navigate("Settings"),
+  toNotificationSettings: () => navigate("Notifications"),
   toSupport: () => navigate("Support"),
   toTermsPrivacy: () => navigate("TermsPrivacy"),
 

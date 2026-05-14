@@ -9,14 +9,12 @@ import {
   ActivityIndicator,
   Image,
   RefreshControl,
-  Dimensions,
 } from "react-native";
 import SafeAreaView from "@/src/components/common/SafeAreaView";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "@hooks/useAuth";
 import { useTheme } from "@hooks/useTheme";
-import { apiClient } from "@config/api.client";
 import { LinearGradient } from "expo-linear-gradient";
 import { COLORS } from "@/src/styles/colors";
 import { getImageUrl } from "@/src/utils/formatters";
@@ -27,13 +25,11 @@ import {
   fetchNotifications,
   fetchUnreadCount,
 } from "@/src/store/slices/notificationSlice";
-import { UserService } from "@/src/services/user.service";
 import { useTranslation } from "@/src/utils/i18n";
 
 interface UserStats {
   totalReviews: number;
   avgRating: number;
-  totalFavorites: number;
   totalCollections?: number;
 }
 
@@ -77,7 +73,6 @@ const ProfileScreen = ({ navigation }: any) => {
       setStats({
         totalReviews: 0,
         avgRating: 0,
-        totalFavorites: 0,
         totalCollections: 0,
       });
 
@@ -230,31 +225,6 @@ const ProfileScreen = ({ navigation }: any) => {
       {/* Stats Grid */}
       {stats && (
         <View style={styles.statsGridSection}>
-          <TouchableOpacity
-            style={[styles.statsCard, { backgroundColor: colors.CARD_BG }]}
-            onPress={() => navigation.navigate("FavoritesList")}
-            activeOpacity={0.7}
-          >
-            <View
-              style={[
-                styles.statsCardIcon,
-                { backgroundColor: isDark ? "#4a2a3a" : "#FFF0F5" },
-              ]}
-            >
-              <Ionicons name="heart" size={24} color="#E91E63" />
-            </View>
-            <Text
-              style={[styles.statsCardValue, { color: colors.TEXT_PRIMARY }]}
-            >
-              {stats.totalFavorites}
-            </Text>
-            <Text
-              style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
-            >
-              {t("profile.favorites")}
-            </Text>
-          </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.statsCard, { backgroundColor: colors.CARD_BG }]}
             activeOpacity={0.7}
@@ -553,8 +523,6 @@ const ProfileScreen = ({ navigation }: any) => {
         return "#4CAF50";
       case "profile":
         return "#2196F3";
-      case "favorite":
-        return "#E91E63";
       default:
         return COLORS.GRAY;
     }

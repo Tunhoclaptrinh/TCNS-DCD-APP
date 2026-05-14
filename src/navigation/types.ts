@@ -1,13 +1,3 @@
-export type RootStackParamList = {
-  Login: undefined;
-  Register: undefined;
-  Home: undefined;
-  Search: undefined;
-  Cart: undefined;
-  Orders: undefined;
-  Profile: undefined;
-  ItemDetail: { id: number | string };
-  GenericDetail: { id: number | string; type?: string };
-  OrderDetail: { orderId: number | string };
-  Checkout: undefined;
-};
+// Navigation types matching the actual app routes
+// Main type is RouteParams in src/config/routes.config.ts
+export type { RouteParams as RootStackParamList } from "../config/routes.config";

@@ -3,7 +3,7 @@ import { AuthService } from "../../services/auth.service";
 import { StorageService } from "../../utils/storage";
 import { AuthResponse, LoginRequest, RegisterRequest, User } from "../../types";
 
-interface AuthState {
+export interface AuthState {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;

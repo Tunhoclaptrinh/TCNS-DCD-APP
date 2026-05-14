@@ -54,3 +54,6 @@ export interface RegisterRequest {
   password?: string;
   fullName?: string;
 }
+
+// Re-exports from sub-type files
+export type { Review, CreateReviewRequest } from "./review";

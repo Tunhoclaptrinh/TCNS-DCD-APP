@@ -9,15 +9,15 @@ export const useNavigation = () => {
   const navigation = useRNNavigation<NavigationProp>();
 
   return {
-    // React Navigation methods
+    // React Navigation instance methods (hook-based, use inside components)
     navigate: navigation.navigate,
     goBack: navigation.goBack,
     canGoBack: navigation.canGoBack,
     reset: navigation.reset,
     replace: navigation.replace as any,
 
-    // Custom helper methods
-    ...NavigationService,
+    // NavigationService shortcut helpers (ref-based, usable anywhere)
+    service: NavigationService,
   };
 };
 
