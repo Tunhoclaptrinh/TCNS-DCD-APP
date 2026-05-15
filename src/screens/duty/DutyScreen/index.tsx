@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Alert,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { COLORS } from "@/src/styles/colors";
@@ -39,6 +40,8 @@ const DutyScreen = ({ navigation }: any) => {
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [viewMode, setViewMode] = useState<"card" | "table">("card");
+  const tableScrollRef = useRef<ScrollView>(null);
   const [managementModalVisible, setManagementModalVisible] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<DutySlot | null>(null);
   const [markingAttendance, setMarkingAttendance] = useState(false);
@@ -109,6 +112,8 @@ const DutyScreen = ({ navigation }: any) => {
           return slotDateStr === targetStr;
         });
       }
+    } else {
+      slots = slots.filter((s) => myUserId !== undefined && s.assignedUserIds.includes(myUserId));
     }
 
     return slots.sort((a, b) => {
@@ -236,11 +241,20 @@ const DutyScreen = ({ navigation }: any) => {
         {/* Day Selector */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.dayScroll}>
           <TouchableOpacity
-            style={[styles.dayChip, selectedDayIdx === -1 && { backgroundColor: COLORS.PRIMARY }]}
+            style={[
+              styles.dayChip,
+              styles.myChip,
+              selectedDayIdx === -1 && { backgroundColor: COLORS.PRIMARY },
+            ]}
             onPress={() => setSelectedDayIdx(-1)}
           >
+            <Ionicons
+              name="person"
+              size={13}
+              color={selectedDayIdx === -1 ? COLORS.WHITE : colors.TEXT_SECONDARY}
+            />
             <Text style={[styles.dayChipText, { color: selectedDayIdx === -1 ? COLORS.WHITE : colors.TEXT_SECONDARY }]}>
-              Tất cả
+              Của tôi
             </Text>
           </TouchableOpacity>
           {weekDays.map((day, idx) => (
@@ -260,16 +274,32 @@ const DutyScreen = ({ navigation }: any) => {
         </ScrollView>
       </View>
 
-      {/* ── Register Button ── */}
-      {isLeaderOrAdmin && (
-        <TouchableOpacity
-          style={[styles.registerBtn, { backgroundColor: COLORS.PRIMARY }]}
-          onPress={() => navigation.navigate("RegisterDuty")}
-        >
-          <Ionicons name="add-circle-outline" size={20} color={COLORS.WHITE} />
-          <Text style={styles.registerBtnText}>Đăng ký lịch trực</Text>
-        </TouchableOpacity>
-      )}
+      {/* ── Register Button + View Toggle ── */}
+      <View style={styles.topActionRow}>
+        {isLeaderOrAdmin && (
+          <TouchableOpacity
+            style={[styles.registerBtn, { backgroundColor: COLORS.PRIMARY, flex: 1, margin: 0 }]}
+            onPress={() => navigation.navigate("RegisterDuty")}
+          >
+            <Ionicons name="add-circle-outline" size={20} color={COLORS.WHITE} />
+            <Text style={styles.registerBtnText}>Đăng ký lịch trực</Text>
+          </TouchableOpacity>
+        )}
+        <View style={[styles.viewToggle, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
+          <TouchableOpacity
+            style={[styles.toggleBtn, viewMode === "card" && { backgroundColor: COLORS.PRIMARY }]}
+            onPress={() => setViewMode("card")}
+          >
+            <Ionicons name="list" size={17} color={viewMode === "card" ? COLORS.WHITE : colors.TEXT_SECONDARY} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.toggleBtn, viewMode === "table" && { backgroundColor: COLORS.PRIMARY }]}
+            onPress={() => setViewMode("table")}
+          >
+            <Ionicons name="grid" size={17} color={viewMode === "table" ? COLORS.WHITE : colors.TEXT_SECONDARY} />
+          </TouchableOpacity>
+        </View>
+      </View>
 
       {/* ── Content ── */}
       {loading ? (
@@ -288,6 +318,172 @@ const DutyScreen = ({ navigation }: any) => {
             <Text style={styles.retryBtnText}>Thử lại</Text>
           </TouchableOpacity>
         </View>
+      ) : viewMode === "table" ? (
+        // ── TABLE VIEW ──
+        (() => {
+          const allSlots = scheduleData?.slots ?? [];
+          // Collect unique shift labels (rows)
+          const shiftKeys: string[] = [];
+          allSlots.forEach((s) => {
+            const key = `${s.shiftLabel}||${s.startTime}||${s.endTime}`;
+            if (!shiftKeys.includes(key)) shiftKeys.push(key);
+          });
+          const SCREEN_W = Dimensions.get("window").width;
+          const COL_W = SCREEN_W * 0.72;
+          const ROW_H = 130;
+          const HEAD_W = 100;
+          return (
+            <View style={{ flex: 1 }}>
+              {/* Hint */}
+              <View style={[styles.tableHint, { borderBottomColor: colors.BORDER }]}>
+                <Ionicons name="swap-horizontal-outline" size={14} color={colors.TEXT_SECONDARY} />
+                <Text style={[styles.tableHintText, { color: colors.TEXT_SECONDARY }]}>Vuốt ngang để xem các ngày tiếp theo</Text>
+              </View>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                ref={tableScrollRef}
+                style={{ flex: 1 }}
+              >
+                <View>
+                  {/* Header row: empty + day columns */}
+                  <View style={[styles.tableHeaderRow, { backgroundColor: colors.CARD_BG, borderBottomColor: colors.BORDER }]}>
+                    <View style={[styles.tableCorner, { width: HEAD_W, borderRightColor: colors.BORDER }]}>
+                      <Text style={[styles.tableCornerText, { color: colors.TEXT_SECONDARY }]}>Ca / Ngày</Text>
+                    </View>
+                    {weekDays.map((day, i) => (
+                      <View key={i} style={[styles.tableColHeader, { width: COL_W, borderRightColor: colors.BORDER }]}>
+                        <Text style={[styles.tableColDay, { color: COLORS.PRIMARY }]}>{day.label}</Text>
+                        <Text style={[styles.tableColDate, { color: colors.TEXT_SECONDARY }]}>{day.dateStr}</Text>
+                      </View>
+                    ))}
+                  </View>
+
+                  {/* Data rows */}
+                  <ScrollView
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                      <RefreshControl refreshing={refreshing} onRefresh={() => fetchSchedule(weekStart, true)} colors={[COLORS.PRIMARY]} tintColor={COLORS.PRIMARY} />
+                    }
+                  >
+                    {shiftKeys.length === 0 ? (
+                      <View style={[styles.emptyBox, { paddingTop: 40 }]}>
+                        <Ionicons name="calendar-outline" size={48} color={colors.BORDER} />
+                        <Text style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}>Không có ca trực trong tuần này</Text>
+                      </View>
+                    ) : (
+                      shiftKeys.map((key, rowIdx) => {
+                        const [shiftLabel, startTime, endTime] = key.split("||");
+                        return (
+                          <View key={key} style={[styles.tableRow, { borderBottomColor: colors.BORDER, backgroundColor: rowIdx % 2 === 0 ? (isDark ? "#1a1a2e" : "#FAFBFF") : colors.CARD_BG }]}>
+                            {/* Row header */}
+                            <View style={[styles.tableRowHeader, { width: HEAD_W, borderRightColor: colors.BORDER }]}>
+                              <Text style={[styles.tableRowShift, { color: colors.TEXT_PRIMARY }]} numberOfLines={2}>
+                                {(() => {
+                                  const parts = shiftLabel.split(" - ");
+                                  let name = parts[0].trim();
+                                  if (!name.toLowerCase().startsWith("ca ")) name = `Ca ${name.toLowerCase()}`;
+                                  return name;
+                                })()}
+                              </Text>
+                              <Text style={[styles.tableRowTime, { color: colors.TEXT_SECONDARY }]}>
+                                {startTime && endTime ? `${startTime}-${endTime}` : ""}
+                              </Text>
+                            </View>
+
+                            {/* Day cells */}
+                            {weekDays.map((day, colIdx) => {
+                              const targetDate = day.date;
+                              const targetStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
+                              const slot = allSlots.find((s) => {
+                                const sd = (s.shiftDate?.toString() ?? "").substring(0, 10);
+                                return sd === targetStr && s.shiftLabel === shiftLabel;
+                              });
+
+                              if (!slot) {
+                                return (
+                                  <View key={colIdx} style={[styles.tableCell, { width: COL_W, borderRightColor: colors.BORDER }]}>
+                                    <Text style={[{ color: colors.TEXT_SECONDARY, fontSize: 12, textAlign: "center" }]}>—</Text>
+                                  </View>
+                                );
+                              }
+
+                              const isMine = myUserId !== undefined && slot.assignedUserIds.includes(myUserId);
+                              const checkedIn = myUserId !== undefined && slot.attendedUserIds.includes(myUserId);
+                              const isLocked = slot.status === "locked";
+                              const fill = slot.assignedUserIds.length;
+                              const cap = slot.capacity;
+                              const pct = cap > 0 ? fill / cap : 0;
+                              const barColor = pct >= 1 ? COLORS.SUCCESS : pct >= 0.5 ? COLORS.WARNING : COLORS.PRIMARY;
+
+                              return (
+                                <View
+                                  key={colIdx}
+                                  style={[
+                                    styles.tableCell,
+                                    {
+                                      width: COL_W,
+                                      borderRightColor: colors.BORDER,
+                                      backgroundColor: isMine ? (isDark ? "#0d2240" : "#EBF3FF") : undefined,
+                                      borderLeftWidth: isMine ? 3 : 0,
+                                      borderLeftColor: isMine ? COLORS.PRIMARY : undefined,
+                                    },
+                                  ]}
+                                >
+                                  {/* Status badge */}
+                                  <View style={[styles.tableCellBadge, { backgroundColor: isLocked ? (isDark ? "#3a3a3a" : "#F0F0F0") : checkedIn ? (isDark ? "#1a3a1a" : "#E8F5E9") : (isDark ? "#1a2a3a" : "#E3F2FD") }]}>
+                                    <Text style={[styles.tableCellBadgeText, { color: isLocked ? COLORS.GRAY : checkedIn ? COLORS.SUCCESS : "#1976D2" }]}>
+                                      {isLocked ? "Đã khóa" : checkedIn ? "✓ Đ.danh" : "Đang mở"}
+                                    </Text>
+                                  </View>
+
+                                  {/* Capacity bar */}
+                                  <View style={styles.tableCellCapRow}>
+                                    <View style={[styles.tableCellBar, { backgroundColor: isDark ? "#2a2a2a" : "#E0E0E0" }]}>
+                                      <View style={[styles.tableCellBarFill, { width: `${Math.min(pct, 1) * 100}%`, backgroundColor: barColor }]} />
+                                    </View>
+                                    <Text style={[styles.tableCellCapText, { color: colors.TEXT_SECONDARY }]}>{fill}/{cap}</Text>
+                                  </View>
+
+                                  {/* Assigned users list */}
+                                  <ScrollView style={{ maxHeight: 60 }} showsVerticalScrollIndicator={false} nestedScrollEnabled>
+                                    {slot.assignedUsers.length > 0 ? (
+                                      slot.assignedUsers.map((u) => (
+                                        <View key={u.id} style={styles.tableCellUser}>
+                                          <View style={[styles.tableCellAvatar, { backgroundColor: u.id === myUserId ? COLORS.PRIMARY : (isDark ? "#3a3a3a" : "#E8EAF6") }]}>
+                                            <Text style={[styles.tableCellAvatarText, { color: u.id === myUserId ? COLORS.WHITE : colors.TEXT_PRIMARY }]}>{u.name.charAt(0).toUpperCase()}</Text>
+                                          </View>
+                                          <Text style={[styles.tableCellUserName, { color: colors.TEXT_PRIMARY }]} numberOfLines={1}>{u.name}</Text>
+                                          {slot.attendedUserIds.includes(u.id) && (
+                                            <Ionicons name="checkmark-circle" size={13} color={COLORS.SUCCESS} />
+                                          )}
+                                        </View>
+                                      ))
+                                    ) : (
+                                      <Text style={[{ color: colors.TEXT_SECONDARY, fontSize: 11, fontStyle: "italic" }]}>Chưa có ai đăng ký</Text>
+                                    )}
+                                  </ScrollView>
+
+                                  {isMine && (
+                                    <View style={styles.tableCellMine}>
+                                      <Ionicons name="person" size={10} color={COLORS.PRIMARY} />
+                                      <Text style={[styles.tableCellMineText, { color: COLORS.PRIMARY }]}>Ca của bạn</Text>
+                                    </View>
+                                  )}
+                                </View>
+                              );
+                            })}
+                          </View>
+                        );
+                      })
+                    )}
+                    <View style={{ height: 80 }} />
+                  </ScrollView>
+                </View>
+              </ScrollView>
+            </View>
+          );
+        })()
       ) : (
         <ScrollView
           contentContainerStyle={styles.slotList}
@@ -327,7 +523,9 @@ const DutyScreen = ({ navigation }: any) => {
             <View style={styles.emptyBox}>
               <Ionicons name="calendar-outline" size={56} color={colors.BORDER} />
               <Text style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}>
-                Không có ca trực nào{selectedDayIdx !== -1 ? " trong ngày này" : " trong tuần này"}
+                {selectedDayIdx === -1 
+                  ? "Bạn không có ca trực nào trong tuần" 
+                  : "Không có ca trực nào trong ngày này"}
               </Text>
             </View>
           ) : (
@@ -352,7 +550,21 @@ const DutyScreen = ({ navigation }: any) => {
                   {/* Card Header */}
                   <View style={styles.slotHeader}>
                     <View style={{ flex: 1 }}>
-                      <Text style={[styles.slotShift, { color: colors.TEXT_PRIMARY }]}>{slot.shiftLabel}</Text>
+                      <Text style={[styles.slotShift, { color: colors.TEXT_PRIMARY }]}>
+                        {(() => {
+                          let label = slot.shiftLabel || "";
+                          const parts = label.split(" - ");
+                          if (parts.length > 0) {
+                            let shiftName = parts[0].trim();
+                            if (!shiftName.toLowerCase().startsWith("ca ")) {
+                              shiftName = `Ca ${shiftName.toLowerCase()}`;
+                            }
+                            parts[0] = shiftName;
+                            return parts.join(" - ");
+                          }
+                          return label;
+                        })()}
+                      </Text>
                       <Text style={[styles.slotTime, { color: colors.TEXT_SECONDARY }]}>
                         {slot.startTime && slot.endTime ? `${slot.startTime} - ${slot.endTime}` : ""}
                         {" · "}
@@ -501,6 +713,37 @@ const DutyScreen = ({ navigation }: any) => {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  // Top action row
+  topActionRow: { flexDirection: "row", alignItems: "center", gap: 10, marginHorizontal: 14, marginVertical: 10 },
+  viewToggle: { flexDirection: "row", borderRadius: 10, borderWidth: 1, overflow: "hidden" },
+  toggleBtn: { width: 36, height: 36, justifyContent: "center", alignItems: "center" },
+  // Table hint
+  tableHint: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 14, paddingVertical: 8, borderBottomWidth: 1 },
+  tableHintText: { fontSize: 12 },
+  // Table
+  tableHeaderRow: { flexDirection: "row", borderBottomWidth: 1.5 },
+  tableCorner: { justifyContent: "center", alignItems: "center", padding: 8, borderRightWidth: 1 },
+  tableCornerText: { fontSize: 11, fontWeight: "700" },
+  tableColHeader: { justifyContent: "center", alignItems: "center", paddingVertical: 10, borderRightWidth: 1 },
+  tableColDay: { fontSize: 13, fontWeight: "800" },
+  tableColDate: { fontSize: 11, marginTop: 2 },
+  tableRow: { flexDirection: "row", borderBottomWidth: 1 },
+  tableRowHeader: { justifyContent: "center", padding: 8, borderRightWidth: 1 },
+  tableRowShift: { fontSize: 11, fontWeight: "700", textAlign: "center" },
+  tableRowTime: { fontSize: 10, textAlign: "center", marginTop: 2 },
+  tableCell: { padding: 8, justifyContent: "flex-start", gap: 4, borderRightWidth: 1, minHeight: 110 },
+  tableCellBadge: { alignSelf: "flex-start", paddingHorizontal: 6, paddingVertical: 2, borderRadius: 8 },
+  tableCellBadgeText: { fontSize: 10, fontWeight: "700" },
+  tableCellCapRow: { flexDirection: "row", alignItems: "center", gap: 4 },
+  tableCellBar: { flex: 1, height: 4, borderRadius: 2, overflow: "hidden" },
+  tableCellBarFill: { height: "100%", borderRadius: 2 },
+  tableCellCapText: { fontSize: 10, fontWeight: "600" },
+  tableCellUser: { flexDirection: "row", alignItems: "center", gap: 4, marginBottom: 2 },
+  tableCellAvatar: { width: 16, height: 16, borderRadius: 8, justifyContent: "center", alignItems: "center" },
+  tableCellAvatarText: { fontSize: 9, fontWeight: "700" },
+  tableCellUserName: { fontSize: 11, flex: 1 },
+  tableCellMine: { flexDirection: "row", alignItems: "center", gap: 2, marginTop: 2 },
+  tableCellMineText: { fontSize: 10, fontWeight: "600" },
   centered: { flex: 1, alignItems: "center", justifyContent: "center", gap: 12, padding: 24 },
   loadingText: { fontSize: 14 },
   errorText: { fontSize: 14, textAlign: "center" },
@@ -518,13 +761,14 @@ const styles = StyleSheet.create({
   navBtn: { width: 32, height: 32, borderRadius: 16, justifyContent: "center", alignItems: "center" },
   dayScroll: { paddingHorizontal: 12 },
   dayChip: { alignItems: "center", paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20, marginRight: 8 },
+  myChip: { flexDirection: "column", gap: 2 },
   dayChipText: { fontSize: 13, fontWeight: "700" },
   dayDate: { fontSize: 11, marginTop: 2 },
 
   // Register button
   registerBtn: {
     flexDirection: "row", alignItems: "center", justifyContent: "center",
-    gap: 6, margin: 14, paddingVertical: 12, borderRadius: 14,
+    gap: 6, paddingVertical: 12, borderRadius: 14,
     shadowColor: COLORS.PRIMARY, shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.25, shadowRadius: 8, elevation: 4,
   },

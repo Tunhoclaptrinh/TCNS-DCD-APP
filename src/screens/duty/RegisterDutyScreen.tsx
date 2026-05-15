@@ -285,7 +285,11 @@ const RegisterDutyScreen = ({ navigation, route }: any) => {
               <View style={[styles.shiftHeader, { backgroundColor: COLORS.PRIMARY }]}>
                 <View style={styles.shiftHeaderLeft}>
                   <Text style={styles.shiftName}>
-                    {shift.name?.toLowerCase().startsWith("ca ") ? shift.name : `Ca ${shift.name}`}
+                    {(() => {
+                      const name = shift.name || "";
+                      if (name.toLowerCase().startsWith("ca ")) return name;
+                      return `Ca ${name.toLowerCase()}`;
+                    })()}
                   </Text>
                   <Text style={styles.shiftTime}>
                     {getDayLabel(shift.date)} {formatDate(shift.date)}
@@ -321,7 +325,14 @@ const RegisterDutyScreen = ({ navigation, route }: any) => {
                     <View style={styles.slotInfo}>
                       <View style={styles.slotTitleRow}>
                         <Text style={[styles.slotName, { color: colors.TEXT_PRIMARY }]} numberOfLines={1}>
-                          {slot.shiftLabel}
+                          {(() => {
+                            let label = slot.shiftLabel || "";
+                            if (label.includes(" - ")) {
+                              label = label.split(" - ").pop() || label;
+                            }
+                            label = label.replace(/^ca\s+/i, "");
+                            return label.charAt(0).toUpperCase() + label.slice(1);
+                          })()}
                         </Text>
 
                       </View>
