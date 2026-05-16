@@ -221,6 +221,35 @@ const DutyScreen = ({ navigation }: any) => {
     return `${s} - ${e}`;
   };
 
+  const renderQuotaCard = () => {
+    if (!scheduleData?.userMetadata) return null;
+    const { registeredKips, weeklyLimitEnabled, weeklyQuota } = scheduleData.userMetadata;
+    const isFull = weeklyLimitEnabled && registeredKips >= weeklyQuota;
+    return (
+      <View style={[styles.quotaCard, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
+        <View style={styles.quotaItem}>
+          <Text style={[styles.quotaValue, { color: COLORS.PRIMARY }]}>
+            {registeredKips}
+          </Text>
+          <Text style={[styles.quotaLabel, { color: colors.TEXT_SECONDARY }]}>Kíp đã đăng ký</Text>
+        </View>
+        <View style={[styles.quotaSep, { backgroundColor: colors.BORDER }]} />
+        <View style={styles.quotaItem}>
+          <Text style={[styles.quotaValue, { color: colors.TEXT_PRIMARY }]}>
+            {weeklyLimitEnabled ? weeklyQuota : "∞"}
+          </Text>
+          <Text style={[styles.quotaLabel, { color: colors.TEXT_SECONDARY }]}>
+            Hạn mức {weeklyLimitEnabled ? (
+              <Text style={{ color: isFull ? COLORS.ERROR : COLORS.SUCCESS, fontWeight: "bold" }}>
+                {isFull ? "Đã đầy" : "Chưa đầy"}
+              </Text>
+            ) : ""}
+          </Text>
+        </View>
+      </View>
+    );
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <View style={[styles.container, { backgroundColor: colors.BACKGROUND }]}>
@@ -328,51 +357,83 @@ const DutyScreen = ({ navigation }: any) => {
             const key = `${s.shiftLabel}||${s.startTime}||${s.endTime}`;
             if (!shiftKeys.includes(key)) shiftKeys.push(key);
           });
+          
+          // Sort rows by start time
+          shiftKeys.sort((a, b) => {
+            const timeA = a.split("||")[1] || "24:00";
+            const timeB = b.split("||")[1] || "24:00";
+            return timeA.localeCompare(timeB);
+          });
           const SCREEN_W = Dimensions.get("window").width;
           const COL_W = SCREEN_W * 0.72;
           const ROW_H = 130;
           const HEAD_W = 100;
+
+          let displayedWeekDays = weekDays;
+          if (selectedDayIdx === -1) {
+            displayedWeekDays = weekDays.filter((day) => {
+              const targetStr = `${day.date.getFullYear()}-${String(day.date.getMonth() + 1).padStart(2, "0")}-${String(day.date.getDate()).padStart(2, "0")}`;
+              return allSlots.some((s) => {
+                const sd = (s.shiftDate?.toString() ?? "").substring(0, 10);
+                return sd === targetStr && myUserId !== undefined && s.assignedUserIds.includes(myUserId);
+              });
+            });
+          }
+
           return (
             <View style={{ flex: 1 }}>
-              {/* Hint */}
-              <View style={[styles.tableHint, { borderBottomColor: colors.BORDER }]}>
-                <Ionicons name="swap-horizontal-outline" size={14} color={colors.TEXT_SECONDARY} />
-                <Text style={[styles.tableHintText, { color: colors.TEXT_SECONDARY }]}>Vuốt ngang để xem các ngày tiếp theo</Text>
-              </View>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                ref={tableScrollRef}
-                style={{ flex: 1 }}
-              >
-                <View>
-                  {/* Header row: empty + day columns */}
-                  <View style={[styles.tableHeaderRow, { backgroundColor: colors.CARD_BG, borderBottomColor: colors.BORDER }]}>
-                    <View style={[styles.tableCorner, { width: HEAD_W, borderRightColor: colors.BORDER }]}>
-                      <Text style={[styles.tableCornerText, { color: colors.TEXT_SECONDARY }]}>Ca / Ngày</Text>
-                    </View>
-                    {weekDays.map((day, i) => (
-                      <View key={i} style={[styles.tableColHeader, { width: COL_W, borderRightColor: colors.BORDER }]}>
-                        <Text style={[styles.tableColDay, { color: COLORS.PRIMARY }]}>{day.label}</Text>
-                        <Text style={[styles.tableColDate, { color: colors.TEXT_SECONDARY }]}>{day.dateStr}</Text>
-                      </View>
-                    ))}
-                  </View>
+              {/* My shifts stats for table view */}
+              {renderQuotaCard()}
 
-                  {/* Data rows */}
+              {shiftKeys.length === 0 || displayedWeekDays.length === 0 ? (
+                <ScrollView
+                  contentContainerStyle={styles.slotList}
+                  refreshControl={
+                    <RefreshControl refreshing={refreshing} onRefresh={() => fetchSchedule(weekStart, true)} colors={[COLORS.PRIMARY]} tintColor={COLORS.PRIMARY} />
+                  }
+                >
+                  <View style={styles.emptyBox}>
+                    <Ionicons name="calendar-outline" size={56} color={colors.BORDER} />
+                    <Text style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}>
+                      {selectedDayIdx === -1 ? "Bạn không có ca trực nào trong tuần" : "Không có ca trực trong tuần này"}
+                    </Text>
+                  </View>
+                </ScrollView>
+              ) : (
+                <View style={{ flex: 1 }}>
+                  {/* Hint */}
+                  <View style={[styles.tableHint, { borderBottomColor: colors.BORDER }]}>
+                    <Ionicons name="swap-horizontal-outline" size={14} color={colors.TEXT_SECONDARY} />
+                    <Text style={[styles.tableHintText, { color: colors.TEXT_SECONDARY }]}>Vuốt ngang để xem các ngày tiếp theo</Text>
+                  </View>
                   <ScrollView
-                    showsVerticalScrollIndicator={false}
-                    refreshControl={
-                      <RefreshControl refreshing={refreshing} onRefresh={() => fetchSchedule(weekStart, true)} colors={[COLORS.PRIMARY]} tintColor={COLORS.PRIMARY} />
-                    }
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    ref={tableScrollRef}
+                    style={{ flex: 1 }}
                   >
-                    {shiftKeys.length === 0 ? (
-                      <View style={[styles.emptyBox, { paddingTop: 40 }]}>
-                        <Ionicons name="calendar-outline" size={48} color={colors.BORDER} />
-                        <Text style={[styles.emptyText, { color: colors.TEXT_SECONDARY }]}>Không có ca trực trong tuần này</Text>
+                    <View>
+                      {/* Header row: empty + day columns */}
+                      <View style={[styles.tableHeaderRow, { backgroundColor: colors.CARD_BG, borderBottomColor: colors.BORDER }]}>
+                        <View style={[styles.tableCorner, { width: HEAD_W, borderRightColor: colors.BORDER }]}>
+                          <Text style={[styles.tableCornerText, { color: colors.TEXT_SECONDARY }]}>Ca / Ngày</Text>
+                        </View>
+                        {displayedWeekDays.map((day, i) => (
+                          <View key={i} style={[styles.tableColHeader, { width: COL_W, borderRightColor: colors.BORDER }]}>
+                            <Text style={[styles.tableColDay, { color: COLORS.PRIMARY }]}>{day.label}</Text>
+                            <Text style={[styles.tableColDate, { color: colors.TEXT_SECONDARY }]}>{day.dateStr}</Text>
+                          </View>
+                        ))}
                       </View>
-                    ) : (
-                      shiftKeys.map((key, rowIdx) => {
+
+                      {/* Data rows */}
+                      <ScrollView
+                        showsVerticalScrollIndicator={false}
+                        refreshControl={
+                          <RefreshControl refreshing={refreshing} onRefresh={() => fetchSchedule(weekStart, true)} colors={[COLORS.PRIMARY]} tintColor={COLORS.PRIMARY} />
+                        }
+                      >
+                        {shiftKeys.map((key, rowIdx) => {
                         const [shiftLabel, startTime, endTime] = key.split("||");
                         return (
                           <View key={key} style={[styles.tableRow, { borderBottomColor: colors.BORDER, backgroundColor: rowIdx % 2 === 0 ? (isDark ? "#1a1a2e" : "#FAFBFF") : colors.CARD_BG }]}>
@@ -392,7 +453,7 @@ const DutyScreen = ({ navigation }: any) => {
                             </View>
 
                             {/* Day cells */}
-                            {weekDays.map((day, colIdx) => {
+                            {displayedWeekDays.map((day, colIdx) => {
                               const targetDate = day.date;
                               const targetStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, "0")}-${String(targetDate.getDate()).padStart(2, "0")}`;
                               const slot = allSlots.find((s) => {
@@ -400,7 +461,9 @@ const DutyScreen = ({ navigation }: any) => {
                                 return sd === targetStr && s.shiftLabel === shiftLabel;
                               });
 
-                              if (!slot) {
+                              const isMine = slot ? (myUserId !== undefined && slot.assignedUserIds.includes(myUserId)) : false;
+
+                              if (!slot || (selectedDayIdx === -1 && !isMine)) {
                                 return (
                                   <View key={colIdx} style={[styles.tableCell, { width: COL_W, borderRightColor: colors.BORDER }]}>
                                     <Text style={[{ color: colors.TEXT_SECONDARY, fontSize: 12, textAlign: "center" }]}>—</Text>
@@ -408,7 +471,6 @@ const DutyScreen = ({ navigation }: any) => {
                                 );
                               }
 
-                              const isMine = myUserId !== undefined && slot.assignedUserIds.includes(myUserId);
                               const checkedIn = myUserId !== undefined && slot.attendedUserIds.includes(myUserId);
                               const isLocked = slot.status === "locked";
                               const fill = slot.assignedUserIds.length;
@@ -476,48 +538,30 @@ const DutyScreen = ({ navigation }: any) => {
                           </View>
                         );
                       })
-                    )}
+                    }
                     <View style={{ height: 80 }} />
                   </ScrollView>
                 </View>
               </ScrollView>
             </View>
-          );
-        })()
-      ) : (
-        <ScrollView
-          contentContainerStyle={styles.slotList}
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={() => fetchSchedule(weekStart, true)}
-              colors={[COLORS.PRIMARY]}
-              tintColor={COLORS.PRIMARY}
-            />
-          }
-        >
-          {/* My shifts stats */}
-          {scheduleData?.userMetadata && (
-            <View style={[styles.quotaCard, { backgroundColor: colors.CARD_BG, borderColor: colors.BORDER }]}>
-              <View style={styles.quotaItem}>
-                <Text style={[styles.quotaValue, { color: COLORS.PRIMARY }]}>
-                  {scheduleData.userMetadata.registeredKips}
-                </Text>
-                <Text style={[styles.quotaLabel, { color: colors.TEXT_SECONDARY }]}>Kíp đã đăng ký</Text>
-              </View>
-              <View style={[styles.quotaSep, { backgroundColor: colors.BORDER }]} />
-              <View style={styles.quotaItem}>
-                <Text style={[styles.quotaValue, { color: colors.TEXT_PRIMARY }]}>
-                  {scheduleData.userMetadata.weeklyLimitEnabled ? scheduleData.userMetadata.weeklyQuota : "∞"}
-                </Text>
-                <Text style={[styles.quotaLabel, { color: colors.TEXT_SECONDARY }]}>
-                  Hạn mức {scheduleData.userMetadata.weeklyLimitEnabled && scheduleData.userMetadata.registeredKips >= scheduleData.userMetadata.weeklyQuota
-                    ? "🔴 Đã đầy"
-                    : ""}
-                </Text>
-              </View>
-            </View>
           )}
+        </View>
+      );
+    })()
+      ) : (
+        <View style={{ flex: 1 }}>
+          {renderQuotaCard()}
+          <ScrollView
+            contentContainerStyle={styles.slotList}
+            refreshControl={
+              <RefreshControl
+                refreshing={refreshing}
+                onRefresh={() => fetchSchedule(weekStart, true)}
+                colors={[COLORS.PRIMARY]}
+                tintColor={COLORS.PRIMARY}
+              />
+            }
+          >
 
           {filteredSlots.length === 0 ? (
             <View style={styles.emptyBox}>
@@ -630,6 +674,7 @@ const DutyScreen = ({ navigation }: any) => {
           )}
           <View style={{ height: 100 }} />
         </ScrollView>
+        </View>
       )}
 
       {/* ── Management Modal ── */}
