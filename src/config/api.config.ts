@@ -44,6 +44,10 @@ export const ENDPOINTS = {
     CANCEL: (id: number | string) => `/duty/slots/${id}/cancel`,
     SELF_CHECK_IN: (id: number | string) => `/duty/slots/${id}/check-in`,
     MARK_ATTENDANCE: (id: number | string) => `/duty/slots/${id}/attendance`,
+    // Kíp trưởng điểm danh từng thành viên (POST body: { userId })
+    LEADER_MARK_ATTENDANCE: (id: number | string) => `/duty/slots/${id}/attendance`,
+    // Logs
+    SLOT_LOGS: (id: number | string) => `/duty/slots/${id}/logs`,
     STATS: "/duty/stats/summary",
     // Shift management (duty:manage)
     UPDATE_SHIFT: (id: number | string) => `/duty/shifts/${id}`,

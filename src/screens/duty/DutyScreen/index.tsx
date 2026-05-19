@@ -5,8 +5,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Modal,
-  FlatList,
   ActivityIndicator,
   Alert,
   RefreshControl,
@@ -17,6 +15,8 @@ import { COLORS } from "@/src/styles/colors";
 import { useTheme } from "@/src/hooks/useTheme";
 import { useAuth } from "@/src/hooks/useAuth";
 import { DutyService, DutySlot, DutyUser, WeeklyScheduleResponse } from "@/src/services/duty.service";
+import AttendanceModal from "../components/AttendanceModal";
+import CheckInButton from "../components/CheckInButton";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
@@ -42,10 +42,9 @@ const DutyScreen = ({ navigation }: any) => {
 
   const [viewMode, setViewMode] = useState<"card" | "table">("card");
   const tableScrollRef = useRef<ScrollView>(null);
-  const [managementModalVisible, setManagementModalVisible] = useState(false);
+  // ── Attendance Modal state ─────────────────────────────────────────────────
+  const [attendanceModalVisible, setAttendanceModalVisible] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState<DutySlot | null>(null);
-  const [markingAttendance, setMarkingAttendance] = useState(false);
-  const [pendingAttendance, setPendingAttendance] = useState<Set<number>>(new Set());
 
   // ── Data Fetching ──────────────────────────────────────────────────────────
   const fetchSchedule = useCallback(async (ws: string, isRefresh = false) => {
@@ -85,7 +84,8 @@ const DutyScreen = ({ navigation }: any) => {
 
   // ── Derived Data ───────────────────────────────────────────────────────────
   const userRole = (user as any)?.role;
-  const isLeaderOrAdmin = true; // Bỏ phân quyền: userRole === "admin" || userRole === "staff";
+  // Admin/Staff luôn có quyền quản lý
+  const isAdminOrStaff = userRole === "admin" || userRole === "staff";
 
   const filteredSlots: DutySlot[] = (() => {
     if (!scheduleData?.slots) return [];
@@ -139,65 +139,31 @@ const DutyScreen = ({ navigation }: any) => {
     !isCheckedIn(slot) &&
     DutyService.isInCheckInWindow(slot.shiftDate, slot.startTime);
 
-  const isLeaderOfSlot = (slot: DutySlot) =>
-    myUserId !== undefined &&
-    (slot.tempLeaderId === myUserId || isLeaderOrAdmin);
+  /**
+   * Kiểm tra xem user hiện tại có quyền quản lý kíp không.
+   * - Admin/Staff: luôn có quyền
+   * - Kíp trưởng mặc định (assignedUserIds[0]): có quyền khi tempLeaderId = null (KT đã check-in)
+   * - Temp leader (người check-in đầu tiên khi KT vắng): có quyền khi tempLeaderId === myUserId
+   */
+  const isLeaderOfSlot = (slot: DutySlot): boolean => {
+    if (myUserId === undefined) return false;
+    // Admin/Staff luôn có quyền
+    if (isAdminOrStaff) return true;
+    // Nếu có tempLeader được chỉ định (KT vắng, người khác check-in đầu)
+    if (slot.tempLeaderId != null) {
+      return slot.tempLeaderId === myUserId;
+    }
+    // Không có tempLeader → KT mặc định (assignedUserIds[0]) giữ quyền
+    return slot.assignedUserIds[0] === myUserId;
+  };
 
   const canManageSlot = (slot: DutySlot) =>
     isLeaderOfSlot(slot) && isMySlot(slot) && isCheckedIn(slot);
 
   // ── Actions ────────────────────────────────────────────────────────────────
-  const handleSelfCheckIn = async (slot: DutySlot) => {
-    Alert.alert(
-      "Xác nhận điểm danh",
-      `Bạn muốn tự điểm danh ca: ${slot.shiftLabel}?`,
-      [
-        { text: "Hủy", style: "cancel" },
-        {
-          text: "Điểm danh",
-          onPress: async () => {
-            try {
-              await DutyService.selfCheckIn(slot.id);
-              Alert.alert("✅ Thành công", "Điểm danh thành công!");
-              fetchSchedule(weekStart);
-            } catch (err: any) {
-              Alert.alert("Lỗi", err?.response?.data?.message || "Điểm danh thất bại.");
-            }
-          },
-        },
-      ]
-    );
-  };
-
   const openManagementModal = (slot: DutySlot) => {
     setSelectedSlot(slot);
-    // Pre-fill với người đã điểm danh
-    setPendingAttendance(new Set(slot.attendedUserIds));
-    setManagementModalVisible(true);
-  };
-
-  const toggleMemberAttendance = (userId: number) => {
-    setPendingAttendance((prev) => {
-      const next = new Set(prev);
-      if (next.has(userId)) next.delete(userId);
-      else next.add(userId);
-      return next;
-    });
-  };
-
-  const saveAttendance = async () => {
-    if (!selectedSlot) return;
-    setMarkingAttendance(true);
-    try {
-      await DutyService.markAttendance(selectedSlot.id, Array.from(pendingAttendance));
-      Alert.alert("✅ Thành công", "Đã lưu điểm danh!");
-      setManagementModalVisible(false);
-      fetchSchedule(weekStart);
-    } catch (err: any) {
-      Alert.alert("Lỗi", err?.response?.data?.message || "Lưu điểm danh thất bại.");
-    } finally {
-      setMarkingAttendance(false);
-    }
+    setAttendanceModalVisible(true);
   };
 
   // ── UI Helpers ─────────────────────────────────────────────────────────────
@@ -305,7 +271,7 @@ const DutyScreen = ({ navigation }: any) => {
 
       {/* ── Register Button + View Toggle ── */}
       <View style={styles.topActionRow}>
-        {isLeaderOrAdmin && (
+        {true && (
           <TouchableOpacity
             style={[styles.registerBtn, { backgroundColor: COLORS.PRIMARY, flex: 1, margin: 0 }]}
             onPress={() => navigation.navigate("RegisterDuty")}
@@ -577,7 +543,6 @@ const DutyScreen = ({ navigation }: any) => {
               const { bg, color, label } = getStatusStyle(slot);
               const mine = isMySlot(slot);
               const checkedIn = isCheckedIn(slot);
-              const showCheckIn = canSelfCheckIn(slot);
               const showManagement = canManageSlot(slot);
 
               return (
@@ -625,7 +590,7 @@ const DutyScreen = ({ navigation }: any) => {
                     <View style={styles.myShiftBadge}>
                       <Ionicons name="person" size={12} color={COLORS.PRIMARY} />
                       <Text style={[styles.myShiftText, { color: COLORS.PRIMARY }]}>
-                        Ca của bạn {checkedIn ? "· ✓ Đã điểm danh" : ""}
+                        Ca của bạn
                       </Text>
                     </View>
                   )}
@@ -645,18 +610,20 @@ const DutyScreen = ({ navigation }: any) => {
                     </Text>
                   </View>
 
+
+
                   {/* Action Buttons */}
-                  {(showCheckIn || showManagement) && (
+                  {(mine || showManagement) && (
                     <View style={[styles.actionRow, { borderTopColor: colors.BORDER }]}>
-                      {showCheckIn && (
-                        <TouchableOpacity
-                          style={[styles.actionBtn, { backgroundColor: COLORS.PRIMARY }]}
-                          onPress={() => handleSelfCheckIn(slot)}
-                        >
-                          <Ionicons name="finger-print" size={16} color={COLORS.WHITE} />
-                          <Text style={styles.actionBtnText}>Điểm danh</Text>
-                        </TouchableOpacity>
+                      {/* Self Check-in Button with countdown */}
+                      {mine && (
+                        <CheckInButton
+                          slot={slot}
+                          myUserId={myUserId}
+                          onSuccess={() => fetchSchedule(weekStart)}
+                        />
                       )}
+                      {/* Management Button (Kíp trưởng) */}
                       {showManagement && (
                         <TouchableOpacity
                           style={[styles.actionBtn, { backgroundColor: COLORS.WARNING }]}
@@ -677,79 +644,14 @@ const DutyScreen = ({ navigation }: any) => {
         </View>
       )}
 
-      {/* ── Management Modal ── */}
-      <Modal
-        visible={managementModalVisible}
-        transparent
-        animationType="slide"
-        onRequestClose={() => setManagementModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: colors.CARD_BG }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.TEXT_PRIMARY }]}>Quản lý kíp</Text>
-              <TouchableOpacity onPress={() => setManagementModalVisible(false)}>
-                <Ionicons name="close" size={24} color={colors.TEXT_SECONDARY} />
-              </TouchableOpacity>
-            </View>
-            {selectedSlot && (
-              <Text style={[styles.modalSubtitle, { color: colors.TEXT_SECONDARY }]}>
-                {selectedSlot.shiftLabel} · {formatDate(selectedSlot.shiftDate)}
-              </Text>
-            )}
-
-            <FlatList
-              data={selectedSlot?.assignedUsers ?? []}
-              keyExtractor={(item) => item.id.toString()}
-              style={{ maxHeight: 320 }}
-              ListEmptyComponent={
-                <Text style={[styles.emptyText, { color: colors.TEXT_SECONDARY, marginTop: 16 }]}>
-                  Chưa có thành viên nào được phân công
-                </Text>
-              }
-              renderItem={({ item }: { item: DutyUser }) => {
-                const attended = pendingAttendance.has(item.id);
-                return (
-                  <View style={[styles.memberRow, { borderBottomColor: colors.BORDER }]}>
-                    <View style={[styles.memberAvatar, { backgroundColor: isDark ? "#3a3a3a" : "#F5F5F5" }]}>
-                      <Text style={[styles.memberAvatarText, { color: colors.TEXT_PRIMARY }]}>
-                        {item.name.charAt(0).toUpperCase()}
-                      </Text>
-                    </View>
-                    <View style={{ flex: 1 }}>
-                      <Text style={[styles.memberName, { color: colors.TEXT_PRIMARY }]}>{item.name}</Text>
-                      <Text style={[styles.memberStudentId, { color: colors.TEXT_SECONDARY }]}>
-                        {item.studentId ?? item.position ?? ""}
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      style={[
-                        styles.attendBtn,
-                        { backgroundColor: attended ? COLORS.SUCCESS : colors.BORDER },
-                      ]}
-                      onPress={() => toggleMemberAttendance(item.id)}
-                    >
-                      <Ionicons name={attended ? "checkmark" : "add"} size={18} color={attended ? COLORS.WHITE : colors.TEXT_SECONDARY} />
-                    </TouchableOpacity>
-                  </View>
-                );
-              }}
-            />
-
-            <TouchableOpacity
-              style={[styles.saveBtn, { backgroundColor: COLORS.PRIMARY }]}
-              onPress={saveAttendance}
-              disabled={markingAttendance}
-            >
-              {markingAttendance ? (
-                <ActivityIndicator color={COLORS.WHITE} />
-              ) : (
-                <Text style={styles.saveBtnText}>Lưu điểm danh ({pendingAttendance.size})</Text>
-              )}
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      {/* ── Attendance Modal (Quản lý kíp) ── */}
+      <AttendanceModal
+        visible={attendanceModalVisible}
+        slot={selectedSlot}
+        myUserId={myUserId}
+        onClose={() => setAttendanceModalVisible(false)}
+        onSaved={() => fetchSchedule(weekStart)}
+      />
     </View>
   );
 };
@@ -860,23 +762,18 @@ const styles = StyleSheet.create({
   },
   actionBtnText: { color: COLORS.WHITE, fontSize: 14, fontWeight: "700" },
 
-  // Modal
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.5)", justifyContent: "flex-end" },
-  modalContent: { borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 20 },
-  modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 6 },
-  modalTitle: { fontSize: 18, fontWeight: "700" },
-  modalSubtitle: { fontSize: 13, marginBottom: 16 },
-  memberRow: {
-    flexDirection: "row", alignItems: "center", gap: 12,
-    paddingVertical: 12, borderBottomWidth: 1,
+  // Attendance progress indicator in card
+  attendedRow: {
+    flexDirection: "row", alignItems: "center", gap: 8,
+    paddingHorizontal: 14, paddingVertical: 8, borderTopWidth: 1,
   },
-  memberAvatar: { width: 42, height: 42, borderRadius: 21, justifyContent: "center", alignItems: "center" },
-  memberAvatarText: { fontSize: 16, fontWeight: "700" },
-  memberName: { fontSize: 15, fontWeight: "600" },
-  memberStudentId: { fontSize: 12 },
-  attendBtn: { width: 34, height: 34, borderRadius: 17, justifyContent: "center", alignItems: "center" },
-  saveBtn: { marginTop: 16, paddingVertical: 14, borderRadius: 14, alignItems: "center" },
-  saveBtnText: { color: COLORS.WHITE, fontSize: 15, fontWeight: "700" },
+  attendedText: { fontSize: 12, fontWeight: "600" },
+  attendedBar: {
+    flex: 1, height: 5, borderRadius: 3, overflow: "hidden",
+  },
+  attendedBarFill: {
+    height: "100%", borderRadius: 3,
+  },
 });
 
 export default DutyScreen;

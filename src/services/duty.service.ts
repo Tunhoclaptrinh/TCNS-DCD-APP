@@ -142,6 +142,26 @@ class DutyServiceClass {
   }
 
   /**
+   * Kíp trưởng điểm danh từng thành viên riêng lẻ (toggle).
+   * BE controller: if (userId) => leaderMarkAttendance, body: { userId }
+   */
+  async leaderMarkAttendance(slotId: number, targetUserId: number): Promise<DutySlot> {
+    const res: any = await apiClient.post(
+      ENDPOINTS.DUTY.LEADER_MARK_ATTENDANCE(slotId),
+      { userId: targetUserId }
+    );
+    return res.data ?? res;
+  }
+
+  /**
+   * Lấy logs điểm danh của một slot.
+   */
+  async getSlotLogs(slotId: number): Promise<any[]> {
+    const res: any = await apiClient.get(ENDPOINTS.DUTY.SLOT_LOGS(slotId));
+    return res.data ?? res ?? [];
+  }
+
+  /**
    * Cập nhật thông tin Ca trực (shift) — chỉ admin/staff.
    * PUT /duty/shifts/:id
    */
