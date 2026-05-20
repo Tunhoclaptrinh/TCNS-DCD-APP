@@ -23,7 +23,6 @@ import RegisterDutyScreen from "../screens/duty/RegisterDutyScreen";
 import EditShiftKipScreen from "../screens/duty/EditShiftKipScreen";
 import MeetingListScreen from "../screens/meetings/MeetingListScreen";
 import MeetingDetailScreen from "../screens/meetings/MeetingDetailScreen";
-import ManageMeetingScreen from "../screens/meetings/ManageMeetingScreen";
 import BonusCampaignsScreen from "../screens/bonus/BonusCampaignsScreen";
 import RegisterBonusScreen from "../screens/bonus/RegisterBonusScreen";
 import ActivityReportScreen from "../screens/profile/ActivityReportScreen";
@@ -166,11 +165,6 @@ const MeetingStack = () => {
         name={ROUTE_NAMES.MEETINGS.DETAIL}
         component={MeetingDetailScreen}
         options={({ navigation }: any) => CustomBackHeader(navigation, "Chi tiết cuộc họp")}
-      />
-      <Stack.Screen
-        name={ROUTE_NAMES.MEETINGS.MANAGE}
-        component={ManageMeetingScreen}
-        options={({ navigation }: any) => CustomBackHeader(navigation, "Quản lý lịch họp")}
       />
     </Stack.Navigator>
   );

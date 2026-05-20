@@ -36,6 +36,17 @@ export const ENDPOINTS = {
     MARK_READ: (id: number | string) => `/notifications/${id}/read`,
   },
 
+  // Meetings (Lịch họp)
+  MEETINGS: {
+    BASE: "/meetings",
+    GET_ONE: (id: number | string) => `/meetings/${id}`,
+    CREATE: "/meetings",
+    UPDATE: (id: number | string) => `/meetings/${id}`,
+    DELETE: (id: number | string) => `/meetings/${id}`,
+    RSVP: (id: number | string) => `/meetings/${id}/rsvp`,
+    ATTENDANCE: "/meetings/attendance",
+  },
+
   // Duty (Lịch trực)
   DUTY: {
     WEEK: "/duty/week",
