@@ -222,34 +222,7 @@ const ProfileScreen = ({ navigation }: any) => {
 
   const renderProfileTab = () => (
     <>
-      {/* Stats Grid */}
-      {stats && (
-        <View style={styles.statsGridSection}>
-          <TouchableOpacity
-            style={[styles.statsCard, { backgroundColor: colors.CARD_BG }]}
-            activeOpacity={0.7}
-          >
-            <View
-              style={[
-                styles.statsCardIcon,
-                { backgroundColor: isDark ? "#2a3a4a" : "#E6F7FF" },
-              ]}
-            >
-              <Ionicons name="grid" size={24} color="#1890ff" />
-            </View>
-            <Text
-              style={[styles.statsCardValue, { color: colors.TEXT_PRIMARY }]}
-            >
-              {stats.totalCollections || 0}
-            </Text>
-            <Text
-              style={[styles.statsCardLabel, { color: colors.TEXT_SECONDARY }]}
-            >
-              {t("profile.collections")}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+
 
       {/* Menu Items */}
       <View style={styles.section}>
